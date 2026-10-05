@@ -1,9 +1,11 @@
 # local environment, never commit
 selftest/env.sh
 example/.env
+example/api.local.json
 
 # self-test artefacts
 selftest/out/
+.vivado-work/
 
 # Vitis / Vivado
 *.log

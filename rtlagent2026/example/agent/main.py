@@ -38,7 +38,7 @@ import time
 
 from .llm import LLM, LLMError, extract_code
 from .skills import load_skills, select
-from .tools import RtlToolchain, check_interface
+from .tools import PART, RtlToolchain, check_interface
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
@@ -110,8 +110,13 @@ def _with_note(note: str, log: str) -> str:
 
 
 def solve_agent(llm: LLM, trace: Trace, prompt: str, interface: str, top: str) -> str:
+    started = time.time()
     rtl = RtlToolchain()
-    trace.write(tool="env", vivado_available=rtl.available, reason=rtl.reason or None)
+    trace.write(tool="env", vivado_available=rtl.available, reason=rtl.reason or None,
+                vivado_backend=rtl.backend, vivado_version=rtl.version,
+                rtl_part=PART,
+                development_only=(rtl.version is not None and rtl.version != "2026.1")
+                or PART != "xczu3eg-sbva484-1-e")
 
     skills = load_skills(SKILL_DIR)
     trace.write(tool="skills", loaded=[s.name for s in skills])
@@ -119,7 +124,6 @@ def solve_agent(llm: LLM, trace: Trace, prompt: str, interface: str, top: str) -
     system = read_prompt_file("system.md")
     repair_tpl = read_prompt_file("repair.md")
 
-    started = time.time()
     best = ""
     last_log = ""
 

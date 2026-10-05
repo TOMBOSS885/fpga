@@ -32,21 +32,85 @@ import shutil
 import subprocess
 import tempfile
 import textwrap
+import time
+
+from .windows_vivado import WindowsVivado, detect_root, is_wsl
 
 PART = os.environ.get("RTL_PART", "xczu3eg-sbva484-1-e")
 
 
 class RtlToolchain:
     def __init__(self) -> None:
+        self.bridge = None
+        self.backend = "linux"
+        self.version = None
+        self.last_work = None
+        self.reason = ""
+        mode = os.environ.get("VIVADO_BACKEND", "auto").lower()
+        if mode not in ("auto", "linux", "windows"):
+            self.reason = "VIVADO_BACKEND must be auto, linux or windows"
+            return
+        try:
+            root = detect_root() if mode != "linux" else None
+            if mode == "windows" or (root is not None and (is_wsl() or os.name == "nt")):
+                if root is None:
+                    raise ValueError("Set VIVADO_WINDOWS_ROOT to the Windows Vivado installation root")
+                self.bridge = WindowsVivado(root)
+                self.backend = "windows-wsl" if is_wsl() else "windows"
+                self.xvlog, self.xelab, self.vivado = (
+                    str(root / "bin" / (name + ".bat")) for name in ("xvlog", "xelab", "vivado"))
+                self._probe()
+                return
+        except (OSError, ValueError, subprocess.SubprocessError) as exc:
+            self.reason = f"Windows Vivado configuration failed: {exc}"
+            return
         self.xvlog = shutil.which("xvlog")
         self.xelab = shutil.which("xelab")
         self.vivado = shutil.which("vivado")
-        self.reason = ""
         missing = [n for n, p in (("xvlog", self.xvlog), ("xelab", self.xelab),
                                   ("vivado", self.vivado)) if not p]
         if missing:
             self.reason = (f"not on PATH: {', '.join(missing)}; "
                            "source your Vivado settings64.sh")
+        else:
+            self._probe()
+
+    def _workdir(self, prefix):
+        if self.bridge:
+            work = self.bridge.workdir(prefix)
+        else:
+            work = tempfile.mkdtemp(prefix=prefix, dir=_scratch_dir())
+        self.last_work = work
+        return work
+
+    def _execute(self, command, work, timeout_s):
+        if self.bridge:
+            return self.bridge.run(command[0], command[1:], work, timeout_s)
+        return _run(command, work, timeout_s)
+
+    def _cleanup(self, work):
+        if os.environ.get("AGENT_KEEP_WORK") != "1":
+            shutil.rmtree(work, ignore_errors=True)
+
+    def _probe(self):
+        work = None
+        try:
+            work = self._workdir("agent_probe_")
+            rc, log = self._execute([self.vivado, "-version"], work, 30)
+            match = re.search(r"Vivado\s+v?(\d{4}\.\d+(?:\.\d+)?)", log)
+            if rc != 0 or not match:
+                self.reason = "Vivado startup check failed: " + summarize_log(log)
+            else:
+                self.version = match.group(1)
+        except (OSError, ValueError, subprocess.SubprocessError) as exc:
+            self.reason = f"Vivado startup check failed: {exc}"
+        finally:
+            if work:
+                self._cleanup(work)
+
+    @staticmethod
+    def _valid_top(top):
+        return re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*", top) is not None
 
     @property
     def available(self) -> bool:
@@ -63,52 +127,69 @@ class RtlToolchain:
         """
         if not self.available:
             return -1, f"vivado unavailable: {self.reason}"
+        if not self._valid_top(top):
+            return 1, "[agent] unsupported top-module identifier"
 
-        work = tempfile.mkdtemp(prefix="agent_lint_", dir=_scratch_dir())
+        work = self._workdir("agent_lint_")
+        started = time.monotonic()
         try:
             src = os.path.join(work, "solution.sv")
-            with open(src, "w") as fh:
+            with open(src, "w", encoding="utf-8") as fh:
                 fh.write(source)
 
-            rc, out = _run([self.xvlog or "xvlog", "--sv", "solution.sv"], work, timeout_s)
+            rc, out = self._execute([self.xvlog, "--sv", "solution.sv"], work, timeout_s)
             if rc != 0:
-                return 1, summarize_log(out)
+                return (-1 if rc < 0 else 1), summarize_log(out)
 
-            rc, out2 = _run([self.xelab or "xelab", top, "-s", "dutsim"], work, timeout_s)
-            return (0 if rc == 0 else 1), summarize_log(out + "\n" + out2)
+            remaining = timeout_s - (time.monotonic() - started)
+            if remaining <= 0:
+                return 1, summarize_log(out + "\n[agent] lint time budget exhausted before xelab")
+            rc, out2 = self._execute([self.xelab, top, "-s", "dutsim"], work, remaining)
+            return (-1 if rc < 0 else (0 if rc == 0 else 1)), summarize_log(out + "\n" + out2)
         finally:
-            if os.environ.get("AGENT_KEEP_WORK") != "1":
-                shutil.rmtree(work, ignore_errors=True)
+            self._cleanup(work)
 
     # ----------------------------------------------------------------- synth
 
     def synth(self, source: str, top: str, timeout_s: float = 900.0) -> tuple[int, str]:
         if not self.available:
             return -1, f"vivado unavailable: {self.reason}"
+        if not self._valid_top(top) or not re.fullmatch(r"[A-Za-z0-9_-]+", PART):
+            return 1, "[agent] unsupported top-module identifier or part name"
 
-        work = tempfile.mkdtemp(prefix="agent_synth_", dir=_scratch_dir())
+        work = self._workdir("agent_synth_")
         try:
-            with open(os.path.join(work, "solution.sv"), "w") as fh:
+            with open(os.path.join(work, "solution.sv"), "w", encoding="utf-8") as fh:
                 fh.write(source)
-            with open(os.path.join(work, "synth.tcl"), "w") as fh:
+            with open(os.path.join(work, "synth.tcl"), "w", encoding="utf-8") as fh:
                 fh.write(
                     textwrap.dedent(
                         f"""\
+                        if {{[llength [get_parts -quiet {PART}]] == 0}} {{
+                            puts "RTL_AGENT_ENV_ERROR: target part {PART} is unavailable in this installation"
+                            exit 2
+                        }}
                         read_verilog -sv solution.sv
                         synth_design -top {top} -part {PART} -mode out_of_context
+                        write_checkpoint -force synthesized.dcp
+                        puts "RTL_AGENT_SYNTH_OK"
                         """
                     )
                 )
-            rc, out = _run(
+            rc, out = self._execute(
                 [self.vivado or "vivado", "-mode", "batch", "-source", "synth.tcl",
                  "-nojournal", "-log", "synth.log"],
                 work, timeout_s,
             )
-            ok = rc == 0 and "Synthesis finished" in out
-            return (0 if ok else 1), summarize_log(out)
+            checkpoint = os.path.join(work, "synthesized.dcp")
+            if re.search(r"^RTL_AGENT_ENV_ERROR:", out, re.MULTILINE):
+                return -1, summarize_log(out)
+            ok = (rc == 0 and re.search(r"^RTL_AGENT_SYNTH_OK\s*$", out, re.MULTILINE)
+                  and os.path.isfile(checkpoint) and os.path.getsize(checkpoint) > 0
+                  and not re.search(r"^\s*ERROR:", out, re.MULTILINE))
+            return (-1 if rc < 0 else (0 if ok else 1)), summarize_log(out)
         finally:
-            if os.environ.get("AGENT_KEEP_WORK") != "1":
-                shutil.rmtree(work, ignore_errors=True)
+            self._cleanup(work)
 
 
 # ------------------------------------------------------- interface checking
@@ -280,7 +361,8 @@ def _scratch_dir() -> str:
 
 _INTERESTING = (
     "ERROR:", "CRITICAL WARNING:", "error:",
-    "Synthesis finished", "Synthesis failed", "Mismatches:",
+    "Synthesis finished", "Synthesis failed", "Mismatches:", "RTL_AGENT_SYNTH_OK", "[agent]",
+    "RTL_AGENT_ENV_ERROR:",
 )
 
 
@@ -291,7 +373,8 @@ def summarize_log(log: str, budget: int = 2000) -> str:
     the context window and buries the one line that matters. Keep the lines that
     carry a verdict, drop the rest, and mark the truncation honestly.
     """
-    lines = [ln.rstrip() for ln in log.splitlines()]
+    # Vivado echoes Tcl source with '#'; these are not executed diagnostics.
+    lines = [ln.rstrip() for ln in log.splitlines() if not ln.lstrip().startswith("#")]
     keep = [ln for ln in lines if any(k in ln for k in _INTERESTING)]
     if not keep:
         keep = lines[-40:]
