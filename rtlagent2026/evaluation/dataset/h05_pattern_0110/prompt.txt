@@ -1,0 +1,2 @@
+Implement a module named TopModule.
+The module should detect the sequence 0110 in a serial bit stream. Input is sampled on the positive edge. The most recent input bits, including the one sampled on the current cycle, match the sequence; otherwise it is 0. Overlapping occurrences count separately. reset is an active-high synchronous reset. pulse is a registered output. After a reset, pulse stays 0 until 4 input bits have been received.

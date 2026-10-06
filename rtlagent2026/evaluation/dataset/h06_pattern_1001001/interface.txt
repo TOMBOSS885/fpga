@@ -1,0 +1,2 @@
+module TopModule(input clk, input reset, input din, output reg pulse);
+endmodule

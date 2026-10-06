@@ -1,0 +1,240 @@
+{
+  "scope": "Reliability regression only; NOT a model evaluation or official L0-L3 score",
+  "upstream_base_commit": "868b44dc1e0ffb0e951394462978e4fe66566eb9",
+  "platform": "Windows",
+  "python": "3.12.14",
+  "native_requested": true,
+  "tests_run": 36,
+  "passed": 36,
+  "skipped": 0,
+  "failures": 0,
+  "errors": 0,
+  "source_sha256": {
+    "agent/tools.py": "7b92fdefb50969d972b81da72cd99fb41e3cb2c197168c1e74b61e218e954889",
+    "agent/orchestrator.py": "a7397b3e2177652f8becd4cd35b8c7b8821a0ea49ef2ae3cdf2b6522de50167c",
+    "agent/verifier_agent.py": "9f628f34566bf7262a5c141d323fb3bec7e1a139bf56450f105b5c2f8e672f1f",
+    "agent/llm.py": "a51b8c47737fca24dd115af42cf0368c27fdae8dfa0aacb777d8b883e7150f3b",
+    "tests/test_reliability.py": "c644c7feea6678d9a8f82569533de4260e0004110be2f38828a1f107d1c2309b",
+    "tests/test_evaluation.py": "edaad6b54893b75951e481eaef44de5462ce028a2ce6a3d9fc982d31bc0b4e1f",
+    "evaluation/run_evaluation.py": "5e8c325753a5484a55f690a305d055dde233f750c744764e8108deef735c05a5",
+    "scripts/run_reliability_tests.py": "97e86069aecf811f62dccf21915f655b5ffab3460a51d6535661572f17d0b2fc"
+  },
+  "tests": [
+    {
+      "test": "test_evaluation.ExternalJudgeTests.test_duplicate_verdict_rejected",
+      "status": "pass",
+      "elapsed_s": 0.015,
+      "detail": ""
+    },
+    {
+      "test": "test_evaluation.ExternalJudgeTests.test_failure_marker_overrides_result",
+      "status": "pass",
+      "elapsed_s": 0.0,
+      "detail": ""
+    },
+    {
+      "test": "test_evaluation.ExternalJudgeTests.test_mismatch_fails",
+      "status": "pass",
+      "elapsed_s": 0.0,
+      "detail": ""
+    },
+    {
+      "test": "test_evaluation.ExternalJudgeTests.test_simulator_crash_rejected",
+      "status": "pass",
+      "elapsed_s": 0.016,
+      "detail": ""
+    },
+    {
+      "test": "test_evaluation.ExternalJudgeTests.test_single_zero_mismatch_pass",
+      "status": "pass",
+      "elapsed_s": 0.0,
+      "detail": ""
+    },
+    {
+      "test": "test_evaluation.ExternalJudgeTests.test_success_marker_alone_does_not_pass",
+      "status": "pass",
+      "elapsed_s": 0.0,
+      "detail": ""
+    },
+    {
+      "test": "test_evaluation.ExternalJudgeTests.test_zero_samples_rejected",
+      "status": "pass",
+      "elapsed_s": 0.015,
+      "detail": ""
+    },
+    {
+      "test": "test_reliability.MilestoneTests.test_failed_lint_never_claims_l1",
+      "status": "pass",
+      "elapsed_s": 0.0,
+      "detail": ""
+    },
+    {
+      "test": "test_reliability.MilestoneTests.test_failed_simulation_rolls_back_to_compiled_candidate",
+      "status": "pass",
+      "elapsed_s": 0.016,
+      "detail": ""
+    },
+    {
+      "test": "test_reliability.MilestoneTests.test_lint_environment_failure_stops_without_repair",
+      "status": "pass",
+      "elapsed_s": 0.016,
+      "detail": ""
+    },
+    {
+      "test": "test_reliability.MilestoneTests.test_missing_toolchain_never_claims_l1",
+      "status": "pass",
+      "elapsed_s": 0.015,
+      "detail": ""
+    },
+    {
+      "test": "test_reliability.MilestoneTests.test_synthesis_success_is_internal_not_official",
+      "status": "pass",
+      "elapsed_s": 0.016,
+      "detail": ""
+    },
+    {
+      "test": "test_reliability.MilestoneTests.test_unknown_functional_verification_keeps_l1",
+      "status": "pass",
+      "elapsed_s": 0.016,
+      "detail": ""
+    },
+    {
+      "test": "test_reliability.NativeVivadoTests.test_correct_inverter",
+      "status": "pass",
+      "elapsed_s": 3.765,
+      "detail": ""
+    },
+    {
+      "test": "test_reliability.NativeVivadoTests.test_stuck_zero_mutant",
+      "status": "pass",
+      "elapsed_s": 3.453,
+      "detail": ""
+    },
+    {
+      "test": "test_reliability.NativeVivadoTests.test_valid_native_synthesis",
+      "status": "pass",
+      "elapsed_s": 24.641,
+      "detail": ""
+    },
+    {
+      "test": "test_reliability.ToolVerdictTests.test_compile_license_failure_classified",
+      "status": "pass",
+      "elapsed_s": 0.0,
+      "detail": ""
+    },
+    {
+      "test": "test_reliability.ToolVerdictTests.test_explicit_license_failures",
+      "status": "pass",
+      "elapsed_s": 0.0,
+      "detail": ""
+    },
+    {
+      "test": "test_reliability.ToolVerdictTests.test_legacy_success_is_not_proof",
+      "status": "pass",
+      "elapsed_s": 0.0,
+      "detail": ""
+    },
+    {
+      "test": "test_reliability.ToolVerdictTests.test_lint_consumes_one_stage_budget",
+      "status": "pass",
+      "elapsed_s": 0.0,
+      "detail": ""
+    },
+    {
+      "test": "test_reliability.ToolVerdictTests.test_mixed_verdict_rejected",
+      "status": "pass",
+      "elapsed_s": 0.016,
+      "detail": ""
+    },
+    {
+      "test": "test_reliability.ToolVerdictTests.test_multiple_results_not_verified",
+      "status": "pass",
+      "elapsed_s": 0.0,
+      "detail": ""
+    },
+    {
+      "test": "test_reliability.ToolVerdictTests.test_nonzero_exit_rejected",
+      "status": "pass",
+      "elapsed_s": 0.0,
+      "detail": ""
+    },
+    {
+      "test": "test_reliability.ToolVerdictTests.test_nonzero_synthesis_is_not_success",
+      "status": "pass",
+      "elapsed_s": 0.015,
+      "detail": ""
+    },
+    {
+      "test": "test_reliability.ToolVerdictTests.test_structured_failure",
+      "status": "pass",
+      "elapsed_s": 0.0,
+      "detail": ""
+    },
+    {
+      "test": "test_reliability.ToolVerdictTests.test_structured_success",
+      "status": "pass",
+      "elapsed_s": 0.0,
+      "detail": ""
+    },
+    {
+      "test": "test_reliability.ToolVerdictTests.test_successful_synthesis_with_license_messages",
+      "status": "pass",
+      "elapsed_s": 0.0,
+      "detail": ""
+    },
+    {
+      "test": "test_reliability.ToolVerdictTests.test_valid_license_is_not_failure",
+      "status": "pass",
+      "elapsed_s": 0.0,
+      "detail": ""
+    },
+    {
+      "test": "test_reliability.ToolVerdictTests.test_zero_comparisons_not_verified",
+      "status": "pass",
+      "elapsed_s": 0.016,
+      "detail": ""
+    },
+    {
+      "test": "test_reliability.VerifierTests.test_actual_comparison_shape_accepted",
+      "status": "pass",
+      "elapsed_s": 0.0,
+      "detail": ""
+    },
+    {
+      "test": "test_reliability.VerifierTests.test_generation_timeout_does_not_launch_simulator",
+      "status": "pass",
+      "elapsed_s": 0.0,
+      "detail": ""
+    },
+    {
+      "test": "test_reliability.VerifierTests.test_generic_fallback_disabled",
+      "status": "pass",
+      "elapsed_s": 0.0,
+      "detail": ""
+    },
+    {
+      "test": "test_reliability.VerifierTests.test_missing_tb_does_not_call_simulator",
+      "status": "pass",
+      "elapsed_s": 0.0,
+      "detail": ""
+    },
+    {
+      "test": "test_reliability.VerifierTests.test_real_backend_does_not_use_benchmark_fixture",
+      "status": "pass",
+      "elapsed_s": 0.0,
+      "detail": ""
+    },
+    {
+      "test": "test_reliability.VerifierTests.test_reference_generation_does_not_receive_dut_source",
+      "status": "pass",
+      "elapsed_s": 0.0,
+      "detail": ""
+    },
+    {
+      "test": "test_reliability.VerifierTests.test_zero_comparison_tb_rejected",
+      "status": "pass",
+      "elapsed_s": 0.0,
+      "detail": ""
+    }
+  ]
+}

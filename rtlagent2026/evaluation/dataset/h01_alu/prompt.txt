@@ -1,0 +1,2 @@
+Implement a module named TopModule.
+Combinational unsigned 8-bit ALU: sel=0 gives a XOR b; sel=1 gives a AND b; sel=2 rotates a left by one bit (wrap bit 7 to bit 0); sel=3 gives the larger unsigned operand (a on equality).

@@ -9,6 +9,7 @@ driving, and automated scoreboard verification before running Vivado xsim simula
 from __future__ import annotations
 
 import re
+import time
 
 from .llm import LLM, extract_code
 from .spec_agent import HardwareSpec
@@ -61,9 +62,9 @@ class VerifierAgent:
             "   - Phase 4 (Randomized Fuzzing): Run 30-50 cycles of randomized inputs (`repeat (40) drive($urandom);`).\n"
             "4. Watchdog Timeout: Ensure simulation terminates automatically (#25000; $display(\"TB_FAILURE: Watchdog timeout\"); $finish;) to prevent hangs.\n"
             "5. Logging Contract:\n"
-            "   - Track integer `errors = 0;`\n"
+            "   - Track integer `errors = 0;` and `checks = 0;`; increment checks only after an actual DUT-versus-independent-reference comparison.\n"
             "   - If mismatch: `$display(\"TB_FAILURE: Mismatch at time %0t: DUT=%h, EXP=%h\", $time, dut_out, exp_out); errors++;`\n"
-            "   - At finish: if `errors == 0`, `$display(\"TB_SUCCESS: All self-tests passed with 0 errors.\");` else `$display(\"TB_FAILURE: Total %0d mismatches.\", errors);`\n"
+            "   - At finish print exactly once `$display(\"TB_RESULT checks=%0d errors=%0d\", checks, errors);`; zero comparisons are NOT a pass.\n"
             "   - Output ONLY a single ```verilog block with `timescale 1ns/1ps."
         )
 
@@ -78,7 +79,7 @@ class VerifierAgent:
             f"({spec.reset_polarity}, {spec.reset_sync}, Reset Value: {spec.reset_value})\n"
             f"Ports: {spec.ports}\n"
             f"{scenarios_text}\n"
-            f"## Current DUT Implementation:\n```verilog\n{dut_code}\n```"
+            "Derive expected behavior from this task specification, not from a DUT implementation.\n"
         )
 
         messages = [
@@ -102,10 +103,16 @@ class VerifierAgent:
             return False
         if spec.module_name not in tb_code or not re.search(rf"\b{re.escape(spec.module_name)}\s+(?:dut|u_dut)\b", tb_code):
             return False
-        return "$finish" in tb_code and ("TB_SUCCESS" in tb_code or "TB_FAILURE" in tb_code)
+        outputs = [re.escape(p["name"]) for p in spec.ports if p["direction"] == "output"]
+        comparison = any(re.search(rf"\b{name}\b\s*(?:!==|===|!=|==)", tb_code) for name in outputs)
+        return "$finish" in tb_code and "TB_RESULT" in tb_code and comparison
 
     def _fallback_tb(self, spec: HardwareSpec, prompt: str = "") -> str:
         """Deterministic fallback testbench when LLM generation fails or in mock mode."""
+        # These legacy fixtures assume particular benchmark semantics. They are
+        # smoke tests only, not a general oracle for a real model's task.
+        if getattr(self.llm, "backend", "") != "mock":
+            return ""
         lower = (prompt or "").lower()
         if "population count" in lower or "popcount" in lower:
             return self._fallback_popcount_tb(spec)
@@ -114,94 +121,8 @@ class VerifierAgent:
             return self._fallback_sequence_tb(spec)
         if "lfsr" in lower or "linear feedback shift" in lower:
             return self._fallback_lfsr_tb(spec)
-        lines = [
-            "`timescale 1ns/1ps",
-            "module tb_self_check();",
-        ]
-
-        inst_ports = []
-        regular_inputs = []
-        regular_outputs = []
-
-        has_clk = False
-        has_rst = False
-
-        for p in spec.ports:
-            name, direction, width = p["name"], p["direction"], p["width"]
-            w_str = f"[{width-1}:0] " if width > 1 else ""
-            if direction == "input":
-                if name.lower() in ("clk", "clock"):
-                    has_clk = True
-                    lines.append("  reg clk = 0;")
-                    inst_ports.append(f".{name}(clk)")
-                elif name.lower() in ("rst", "reset", "rst_n", "reset_n"):
-                    has_rst = True
-                    active_rst = 0 if spec.reset_polarity == "active_low" else 1
-                    lines.append(f"  reg {name} = {active_rst};")
-                    inst_ports.append(f".{name}({name})")
-                else:
-                    lines.append(f"  reg {w_str}{name} = 0;")
-                    inst_ports.append(f".{name}({name})")
-                    regular_inputs.append((name, width))
-            else:
-                lines.append(f"  wire {w_str}{name};")
-                inst_ports.append(f".{name}({name})")
-                regular_outputs.append((name, width))
-
-        if not has_clk and spec.is_sequential:
-            lines.append("  reg clk = 0;")
-            has_clk = True
-
-        lines.append("")
-        lines.append(f"  {spec.module_name} dut (")
-        lines.append("    " + ",\n    ".join(inst_ports))
-        lines.append("  );")
-        lines.append("")
-
-        if has_clk:
-            lines.append("  always #2.5 clk = ~clk;")
-            lines.append("")
-
-        lines.append("  initial begin")
-        lines.append("    int errors = 0;")
-        lines.append("    #5;")
-
-        if has_rst:
-            rst_name = spec.reset_port or "reset"
-            active_rst = 0 if spec.reset_polarity == "active_low" else 1
-            inactive_rst = 1 if active_rst == 0 else 0
-            lines.append(f"    {rst_name} = {active_rst};")
-            lines.append(f"    #20; {rst_name} = {inactive_rst}; #10;")
-
-        # Input sweep
-        lines.append("    // Stimulus sweep")
-        for i in range(5):
-            for in_name, in_w in regular_inputs:
-                val = f"{in_w}'h{i % (1 << min(in_w, 8)):x}"
-                lines.append(f"    {in_name} = {val};")
-            lines.append("    #10;")
-            for out_name, out_w in regular_outputs:
-                lines.append(f"    if (^{out_name} === 1'bx) begin")
-                lines.append(f'      $display("TB_FAILURE: Output {out_name} has unknown X value at %0t", $time);')
-                lines.append("      errors++;")
-                lines.append("    end")
-
-        lines.append("")
-        lines.append("    if (errors == 0) begin")
-        lines.append('      $display("TB_SUCCESS: All self-tests passed with 0 errors.");')
-        lines.append("    end else begin")
-        lines.append('      $display("TB_FAILURE: Total %0d errors detected.", errors);')
-        lines.append("    end")
-        lines.append("    $finish;")
-        lines.append("  end")
-        lines.append("")
-        lines.append("  initial begin")
-        lines.append("    #20000;")
-        lines.append('    $display("TB_FAILURE: Watchdog timeout");')
-        lines.append("    $finish;")
-        lines.append("  end")
-        lines.append("endmodule")
-        return "\n".join(lines) + "\n"
+        # Knowing that outputs are not X cannot establish task correctness.
+        return ""
 
     @staticmethod
     def _fallback_popcount_tb(spec: HardwareSpec) -> str:
@@ -214,17 +135,19 @@ class VerifierAgent:
 module tb_self_check();
   reg [{w-1}:0] {inp["name"]};
   wire [{out["width"]-1}:0] {out["name"]};
-  integer errors = 0, value, i, expected;
+  integer errors = 0, checks = 0, value, i, expected;
   {spec.module_name} dut (.{inp["name"]}({inp["name"]}), .{out["name"]}({out["name"]}));
   initial begin
     for (value = 0; value < (1 << {min(w, 8)}); value = value + 1) begin
       {inp["name"]} = value; expected = 0;
       for (i = 0; i < {w}; i = i + 1) expected = expected + {inp["name"]}[i];
       #1;
+      checks = checks + 1;
       if ({out["name"]} !== expected) begin
         $display("TB_FAILURE: value=%0d DUT=%0d EXP=%0d", value, {out["name"]}, expected); errors = errors + 1;
       end
     end
+    $display("TB_RESULT checks=%0d errors=%0d", checks, errors);
     if (errors == 0) $display("TB_SUCCESS: All self-tests passed with 0 errors.");
     else $display("TB_FAILURE: Total %0d mismatches.", errors);
     $finish;
@@ -255,13 +178,14 @@ module tb_self_check();
   wire {out_decl}{out["name"]};
   reg [3:0] model = 0;
   reg [3:0] next_model;
-  integer errors = 0;
+  integer errors = 0, checks = 0;
   always #2.5 {clk} = ~{clk};
   {spec.module_name} dut (.{clk}({clk}){rst_conn}, .{inp["name"]}({inp["name"]}), .{out["name"]}({out["name"]}));
   task drive(input reg b);
     begin @(negedge {clk}); {inp["name"]} = b; @(posedge {clk}); #1;
       if ({active_rst}) begin next_model = 0; model = 0; end
       else begin next_model = {{model[2:0], b}}; model = next_model; end
+      checks = checks + 1;
       if ({out["name"]} !== (next_model == 4'b1101)) begin
         $display("TB_FAILURE: DUT=%b expected=%b", {out["name"]}, (next_model == 4'b1101)); errors = errors + 1;
       end
@@ -270,6 +194,7 @@ module tb_self_check();
   initial begin
     repeat (2) @(posedge {clk}){reset_release};
     drive(1); drive(1); drive(0); drive(1); drive(1); drive(0); drive(1);
+    $display("TB_RESULT checks=%0d errors=%0d", checks, errors);
     if (errors == 0) $display("TB_SUCCESS: All self-tests passed with 0 errors.");
     else $display("TB_FAILURE: Total %0d mismatches.", errors);
     $finish;
@@ -328,16 +253,18 @@ module tb_self_check();
   {' '.join(declarations)}
   wire [{out["width"]-1}:0] {out["name"]};
   reg [{out["width"]-1}:0] model = 0;
-  integer errors = 0;
+  integer errors = 0, checks = 0;
   always #2.5 {clk} = ~{clk};
   {spec.module_name} dut (.{clk}({clk}){reset_conn}{load_conn}{data_conn}, .{out["name"]}({out["name"]}));
   task check; begin @(posedge {clk}); #1;
     {model_logic}
+    checks = checks + 1;
     if ({out["name"]} !== model) begin $display("TB_FAILURE: DUT=%h EXP=%h", {out["name"]}, model); errors = errors + 1; end
   end endtask
   initial begin
     repeat (2) check;{release_reset}{load_drive} check;
     {clear_load} check; check;
+    $display("TB_RESULT checks=%0d errors=%0d", checks, errors);
     if (errors == 0) $display("TB_SUCCESS: All self-tests passed with 0 errors.");
     else $display("TB_FAILURE: Total %0d mismatches.", errors);
     $finish;
@@ -348,16 +275,23 @@ endmodule
 
     def verify(self, spec: HardwareSpec, prompt: str, dut_code: str, timeout_s: float = 120.0) -> tuple[int, str]:
         """Execute self-checking simulation and report verdict."""
+        deadline = time.monotonic() + timeout_s
         tb_code = self.build_testbench(spec, prompt, dut_code)
-        rc, log = self.tools.run_sim(dut_code, tb_code, tb_top="tb_self_check", timeout_s=timeout_s)
+        if not tb_code:
+            return -3, "VERIFICATION_UNAVAILABLE: no specification-backed testbench"
+        remaining = deadline - time.monotonic()
+        if remaining <= 0:
+            return -3, "VERIFICATION_UNAVAILABLE: testbench generation exhausted stage budget"
+        rc, log = self.tools.run_sim(dut_code, tb_code, tb_top="tb_self_check", timeout_s=remaining)
         # A model-generated testbench can be syntactically invalid even when
         # the DUT passed L1.  Retry once with the deterministic skill-backed
         # testbench before asking the repair model to change correct RTL.
         if rc != 0 and ("TB compilation failed" in log or "TB elaboration failed" in log):
             fallback_tb = self._fallback_tb(spec, prompt)
-            if fallback_tb and fallback_tb != tb_code:
+            remaining = deadline - time.monotonic()
+            if fallback_tb and fallback_tb != tb_code and remaining > 0:
                 rc_fallback, log_fallback = self.tools.run_sim(
-                    dut_code, fallback_tb, tb_top="tb_self_check", timeout_s=timeout_s
+                    dut_code, fallback_tb, tb_top="tb_self_check", timeout_s=remaining
                 )
                 if rc_fallback == 0:
                     return 0, "Generated TB rejected; deterministic fallback passed.\n" + log_fallback

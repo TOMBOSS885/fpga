@@ -60,7 +60,7 @@ class MultiAgentOrchestrator:
     def __init__(self, skill_dir: str):
         self.llm = LLM()
         self.tools = RtlToolchain()
-        self.skills = load_skills(skill_dir)
+        self.skills = [] if os.environ.get("AGENT_DISABLE_SKILLS") == "1" else load_skills(skill_dir)
 
         # Initialize subagents
         self.spec_agent = SpecAgent(self.llm)
@@ -95,6 +95,7 @@ class MultiAgentOrchestrator:
             tool="orchestrator",
             event="finished",
             delivered_level=level,
+            verification_scope="internal_milestone_not_official_score",
             bytes=len(code or ""),
             solution_sha256=self._solution_sha256(code),
             reason=reason,
@@ -103,6 +104,7 @@ class MultiAgentOrchestrator:
         return code
 
     def solve(self, prompt: str, interface: str, trace: TraceLogger, top_override: str = "") -> str:
+        self.quality = QualityRollbackGuard()
         budget = DynamicBudgetController(deadline_s=DEADLINE_S, reserve_s=RESERVE_S, max_rounds=MAX_ROUNDS)
         self.llm.set_deadline(budget.deadline_at)
         self.llm.set_trace_hook(trace.log)
@@ -182,9 +184,6 @@ class MultiAgentOrchestrator:
                 )
                 continue
 
-            # Record Level 1 milestone candidate
-            self.quality.record_attempt(current_code, current_level=1, round_num=rnd)
-
             # If toolchain not available (dry run or mock mode), return verified contract
             if not self.tools.available:
                 # Keep offline/mock mode useful, but do not label an untested
@@ -192,7 +191,7 @@ class MultiAgentOrchestrator:
                 # honest deliverable when Vivado is absent.
                 trace.log(tool="orchestrator", event="accept", reason="no_toolchain_available", round=rnd,
                           note=self.tools.reason)
-                return self._finish(trace, budget, current_code, 1, "no_toolchain_available")
+                return self._finish(trace, budget, current_code, 0, "no_toolchain_available")
 
             # --- STAGE 1: xvlog + xelab Single Module Lint (L1) ---
             t_lint = budget.allocate_timeout("lint")
@@ -200,6 +199,9 @@ class MultiAgentOrchestrator:
             clean_lint_log = self.pruner.prune(log_lint, current_code)
             trace.log(tool="lint", round=rnd, rc=rc_lint, excerpt=clean_lint_log[:1000])
 
+            if rc_lint < 0:
+                best_code, level = self.quality.get_best_deliverable(current_code, final_level=0)
+                return self._finish(trace, budget, best_code, level, "lint_environment_error")
             if rc_lint != 0:
                 matched_skills = select_skills(self.skills, clean_lint_log)
                 trace.log(tool="skill_selector", phase="lint_repair", round=rnd,
@@ -209,6 +211,7 @@ class MultiAgentOrchestrator:
                 )
                 continue
 
+            self.quality.record_attempt(current_code, current_level=1, round_num=rnd)
             # --- STAGE 2: Micro-Testbench Self-Checking Sim (L2) ---
             t_sim = budget.allocate_timeout("sim")
             t0 = time.time()
@@ -226,7 +229,8 @@ class MultiAgentOrchestrator:
                 trace.log(tool="orchestrator", event="environment_error", stage="simulation",
                           rc=rc_sim, excerpt=clean_sim_log[:500])
                 best_code, level = self.quality.get_best_deliverable(current_code, final_level=1)
-                return self._finish(trace, budget, best_code, level, "simulation_environment_error")
+                reason = "local_verification_unavailable" if rc_sim == -3 else "simulation_environment_error"
+                return self._finish(trace, budget, best_code, level, reason)
 
             if rc_sim != 0:
                 is_osc, _ = self.quality.record_attempt(current_code, current_level=1, round_num=rnd)

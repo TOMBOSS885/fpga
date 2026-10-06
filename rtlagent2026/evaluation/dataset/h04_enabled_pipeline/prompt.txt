@@ -1,0 +1,2 @@
+Implement a module named TopModule.
+Two-stage 8-bit enabled pipeline on rising clk edges. Active-high synchronous reset clears BOTH stages to zero even when en=0. If en=1, stage1 captures din and y captures the OLD stage1 value from before that edge. If en=0 both stages hold. y is the second stage.

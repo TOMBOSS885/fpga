@@ -1,0 +1,2 @@
+Implement a module named TopModule.
+Combinational signed saturating addition. Interpret a and b as signed two-complement 8-bit values. Compute their mathematical sum and clamp to [-128,127]. Output the clamped signed 8-bit value y. No clock.

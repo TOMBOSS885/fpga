@@ -1,0 +1,61 @@
+{
+  "development_only": true,
+  "warning": "Small known/public sets, one sample per mode. NOT official grades, not unseen pass@k, not AMD deployment verification.",
+  "suites": {
+    "public": {
+      "agent": {
+        "total": 3,
+        "graded": 3,
+        "excluded": [],
+        "external_function_pass": 2,
+        "external_l3": 2,
+        "local_mean_coefficient": 0.7333333333333334
+      },
+      "baseline": {
+        "total": 3,
+        "graded": 3,
+        "excluded": [],
+        "external_function_pass": 2,
+        "external_l3": 2,
+        "local_mean_coefficient": 0.7333333333333334
+      }
+    },
+    "regression": {
+      "agent": {
+        "total": 6,
+        "graded": 6,
+        "excluded": [],
+        "external_function_pass": 1,
+        "external_l3": 1,
+        "local_mean_coefficient": 0.3
+      },
+      "baseline": {
+        "total": 6,
+        "graded": 6,
+        "excluded": [],
+        "external_function_pass": 0,
+        "external_l3": 0,
+        "local_mean_coefficient": 0.16666666666666666
+      }
+    },
+    "public_no_skills": {
+      "no_skills": {
+        "total": 3,
+        "graded": 3,
+        "excluded": [],
+        "external_function_pass": 1,
+        "external_l3": 1,
+        "local_mean_coefficient": 0.4666666666666666
+      }
+    }
+  },
+  "fixture_health": {
+    "positive_pass": 6,
+    "stuck_zero_rejected": 6
+  },
+  "source_changed_during_generation": {
+    "public": false,
+    "regression": false,
+    "no_skills": false
+  }
+}
