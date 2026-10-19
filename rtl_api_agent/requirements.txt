@@ -1,0 +1,2 @@
+# The runtime uses only Python 3.10+ standard library modules.
+# Vivado and the inference server come from the official base environment.
