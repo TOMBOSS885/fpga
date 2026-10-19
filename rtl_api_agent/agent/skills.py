@@ -17,13 +17,15 @@ def select(root: Path, query: str, limit: int = 3, max_chars: int = 6000) -> tup
         ranked.append((score, path.parent.name, text))
     ranked.sort(key=lambda v: (-v[0], v[1]))
     selected, blocks, used = [], [], 0
-    for score, name, text in ranked[:limit]:
-        if score == 0:
-            continue
-        excerpt = text[:max(0, max_chars - used)]
+    picks = [item for item in ranked if item[0] > 0][:limit]
+    for index, (score, name, text) in enumerate(picks):
+        header = f"### {name}\n"
+        # A long official contract must not starve arithmetic/reset skills.
+        allowance = (max_chars - used) // (len(picks) - index)
+        excerpt = text[:max(0, allowance - len(header) - 2)]
         if not excerpt:
             break
-        blocks.append(f"### {name}\n{excerpt}")
+        blocks.append(header + excerpt)
         selected.append(name)
-        used += len(excerpt)
+        used += len(header) + len(excerpt) + 2
     return "\n\n".join(blocks), selected

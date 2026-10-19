@@ -13,12 +13,21 @@ from agent.artifacts import extract_sv, module_contract, preflight, task_contrac
 from agent.client import Client, ModelError, Reply
 from agent.config import Config, canonical_url
 from agent.process import Deadline, run
+from agent.skills import select
 from agent.tools import Result, Toolchain, license_error, verdict
 from agent.trace import digest
 from agent.workflow import Workflow
 from support import BAD, DUT, PROMPT, TB, TraceStub, inference
 
 ROOT = Path(__file__).resolve().parents[1]
+
+
+class SkillTests(unittest.TestCase):
+    def test_long_contract_does_not_starve_task_specific_skill(self):
+        text,names=select(ROOT/'skill','popcount signed overflow truncation bit count',max_chars=6000)
+        self.assertIn('rtl-module-interface-contract',names)
+        self.assertIn('rtl-arithmetic-truncation',names)
+        self.assertLessEqual(len(text),6000)
 
 
 class ArtifactTests(unittest.TestCase):

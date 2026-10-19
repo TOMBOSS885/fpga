@@ -3,7 +3,7 @@
 - 日期：2026-10-19。
 - 环境：当前 Linux 开发机，Python 3.14.4；没有 Vivado、AMD 推理服务或 Docker 构建验证。
 - 命令（在包根目录）：`python3 -B -m unittest discover -s tests -v`。
-- 结果：42 项发现，40 项通过，2 项原生 Vivado 测试跳过，0 失败/错误；本次约 11.4 秒。
+- 结果：43 项发现，41 项通过，2 项原生 Vivado 测试跳过，0 失败/错误；本次约 11.4 秒。
 - HTTP 集成实际经过 `/v1/solve`、单题脚本、HTTP 模型 fixture 和假 EDA 可执行文件；假 EDA 不执行 RTL 语义检查。
 - 挂起工具测试在 4 秒解题预算下保留初始 RTL checkpoint，并在测试要求的 5.2 秒内返回。
 - `bash -n` 检查三个 shell 入口；Python AST 与 manifest JSON 检查通过。
