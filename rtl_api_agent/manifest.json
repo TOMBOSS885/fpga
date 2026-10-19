@@ -1,0 +1,39 @@
+{
+  "schema_version": 1,
+  "track": "rtl",
+  "name": "rtl-api-agent",
+  "model": {
+    "name": "CONFIGURE_LLM_MODEL_BEFORE_SUBMISSION",
+    "source": null,
+    "revision": null,
+    "quantization": null,
+    "measured_vram_gb": null,
+    "finetuned": false
+  },
+  "context": {
+    "max_model_len": 16384,
+    "max_output_tokens": 4096,
+    "baseline_max_output_tokens": 8192,
+    "rope_scaling": null
+  },
+  "serving": {
+    "backend": "externally_managed_openai_compatible",
+    "version": null,
+    "start_command": "configure existing AMD inference service; see serve/README.md",
+    "base_url_env": "LLM_BASE_URL"
+  },
+  "endpoints": {
+    "solve": "./run.sh",
+    "baseline": "./run_baseline.sh",
+    "http_start": "./serve/start.sh",
+    "http_port": 7860
+  },
+  "agent": {
+    "architecture": "budgeted_rtl_tool_loop",
+    "roles": ["rtl_engineer", "independent_verifier", "dut_repair", "testbench_repair"],
+    "max_repairs": 3,
+    "tools": ["check_interface", "xvlog", "xelab", "xsim", "vivado"],
+    "verification_scope": "local_model_generated_oracle_not_official_score"
+  },
+  "submission_status": "engineering_prototype_requires_actual_model_and_official_environment_validation"
+}
