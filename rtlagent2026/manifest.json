@@ -1,0 +1,52 @@
+{
+  "schema_version": 1,
+  "track": "rtl",
+  "model": {
+    "name": "Qwen/Qwen2.5-Coder-14B-Instruct",
+    "source": "https://huggingface.co/Qwen/Qwen2.5-Coder-14B-Instruct",
+    "revision": "main",
+    "quantization": "AWQ",
+    "measured_vram_gb": 14.8,
+    "finetuned": false,
+    "finetune_weights_url": null
+  },
+  "context": {
+    "max_model_len": 4096,
+    "max_output_tokens": 2048,
+    "rope_scaling": null
+  },
+  "serving": {
+    "backend": "vllm",
+    "version": "0.6.3+rocm",
+    "start_command": "./serve/vllm.sh",
+    "port": 8000
+  },
+  "endpoints": {
+    "solve": "./run.sh",
+    "baseline": "./run_baseline.sh",
+    "http_port": 7860
+  },
+  "agent": {
+    "architecture": "multi_agent_collaborative",
+    "roles": [
+      "spec_architect",
+      "rtl_coder",
+      "verification_critic",
+      "diagnostic_repairer"
+    ],
+    "max_rounds": 4,
+    "tools": [
+      "check_interface",
+      "lint",
+      "sim_testbench",
+      "synth"
+    ],
+    "skills": [
+      "rtl-interface-contract",
+      "rtl-clock-reset-conventions",
+      "rtl-fsm-idioms",
+      "rtl-synthesis-latch-prevention",
+      "rtl-self-testbench-generator"
+    ]
+  }
+}
