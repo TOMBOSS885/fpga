@@ -1,42 +1,17 @@
 ---
 name: rtl-shift-register-pattern
-description: Idioms for sequence detection and Linear Feedback Shift Registers (LFSR), ensuring correct overlapping detection and non-zero initialization.
+description: Implement specified sequence overlap, output timing, LFSR taps, shift direction and seed without changing required state behavior.
 ---
 
-# Agent Skill: RTL Shift Register & Sequence Detector Pattern
+# Sequence detection and LFSR semantics
 
-## Skill Metadata
-- **Name:** `rtl-shift-register-pattern`
-- **Description:** 规范序列检测器与线性反馈移位寄存器（LFSR）设计，解决重叠检测漏报、移位方向错误、抽头异或位权反转与死锁陷阱。
-- **Trigger:** 序列检测（如 1101）、重叠子串漏报、LFSR 周期缩水、抽头逻辑错误。
+移位寄存器和 FSM 都是可选实现；题面要求的状态编码、转换和可观察输出必须保留。不得自行选择重叠规则、种子或反馈多项式。
+
+- **Trigger:** 序列检测、重叠子串、LFSR 周期、移位方向、抽头和反馈。
 - **Log signatures:** `sequence`, `detector`, `lfsr`, `shift register`, `overlapping`, `feedback`, `taps`
 
-## 规则与核心范式
-
-1. **定长序列检测首选移位寄存器（Shift Register over FSM）**：
-   - 对于固定长度（如 4 位 1101）的序列检测，移位寄存器方案优于多状态 FSM：
-     ```verilog
-     // 移位寄存器天然支持重叠检测（如 1101101 检出两次）且免疫 FSM 状态转移死锁
-     reg [3:0] sr;
-     always @(posedge clk) begin
-         if (reset) begin
-             sr       <= 4'b0000;
-             detected <= 1'b0;
-         end else begin
-             sr       <= {sr[2:0], in};
-             // 在输入入队的同一拍判定，并打拍输出
-             detected <= ({sr[2:0], in} == 4'b1101);
-         end
-     end
-     ```
-2. **LFSR 反馈多项式与抽头方向**：
-   - **Fibonacci LFSR**（左移，低位进抽头）：
-     ```verilog
-     // feedback 抽头由特定高位异或产生，填入最低位 [0]
-     wire feedback = q[7] ^ q[5] ^ q[4] ^ q[3];
-     q <= {q[6:0], feedback};
-     ```
-   - **防止全零/非法死锁**：
-     - LFSR 在全零状态下异或反馈始终为 0，会陷入死锁循环。复位值必须赋予非零种子（如 `8'h01`）。
-3. **输出对齐要求**：
-   - 注意题面要求输出是纯组合还是打拍输出（registered output）。如果要求打拍输出，必须在 `always @(posedge clk)` 中赋值。
+- 逐位区分“接收当前输入前的历史”和“加入当前输入后的窗口”。非阻塞赋值右侧读取旧值；使用旧窗口或新窗口比较会相差一拍。输出是否注册、在哪一拍有效由题面决定。
+- 有效窗口尚未填满时，复位填充值可能制造假的匹配，尤其是前导零模式。按题面确定复位后哪些历史有效，必要时跟踪已接收位数。
+- 可重叠检测在匹配后保留仍为目标前缀的后缀；非重叠检测按规定清除历史。覆盖连续匹配、重叠匹配、复位打断及相近但不匹配的流。
+- LFSR 按每一位的次态方程确认 Fibonacci/Galois 形式、左/右移、索引方向、抽头与 XOR/XNOR；不能把任意示例的抽头直接套入题目。
+- XOR LFSR 的全零状态可能锁死，但若题面规定零种子或未要求自动恢复，不得自行改为非零或增加恢复逻辑。复位、load 与 enable 的优先级仍以题面为准。

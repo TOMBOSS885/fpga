@@ -9,9 +9,9 @@ COPY agent/ agent/
 COPY skill/ skill/
 COPY serve/ serve/
 COPY model/ model/
-COPY run.sh run_baseline.sh baseline.py manifest.json REPORT.md README.md LICENSE ./
+COPY run.sh run_baseline.sh terminal_agent.sh baseline.py manifest.json REPORT.md README.md LICENSE ./
 RUN python3 -c "import sys; assert sys.version_info >= (3,10)" \
-    && chmod +x run.sh run_baseline.sh serve/start.sh \
+    && chmod +x run.sh run_baseline.sh terminal_agent.sh serve/start.sh \
     && python3 -c "import hashlib; assert hashlib.sha256(open('baseline.py','rb').read()).hexdigest() == '537783e39db22079c33c19af475dbdb760a29ff1656a48c481d434131f84fb51'"
 
 ENV PYTHONUNBUFFERED=1 \

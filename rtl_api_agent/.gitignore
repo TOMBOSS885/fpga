@@ -3,4 +3,5 @@ __pycache__/
 .env
 *.key
 results/
+.rtl-agent.json
 models/

@@ -62,6 +62,91 @@ class Contract:
     source: str = "unknown"
 
 
+@dataclass(frozen=True)
+class TaskProfile:
+    """Small, deterministic task summary shared by prompts and skill routing.
+
+    This is deliberately a heuristic summary, not a second specification.  It
+    lets the agent spend context on the risks visible in the task while keeping
+    the original prompt immutable and authoritative.
+    """
+
+    top: str
+    style: str
+    tags: tuple[str, ...] = ()
+    ports: tuple[str, ...] = ()
+
+    def compact(self) -> str:
+        tags = ", ".join(self.tags) if self.tags else "none detected"
+        ports = ", ".join(self.ports) if self.ports else "not parsed"
+        return f"top={self.top}; style={self.style}; ports={ports}; risks={tags}"
+
+    def checks(self) -> str:
+        """Verification obligations, never inferred functional requirements."""
+        checks = {
+            "async_reset": "Check asynchronous reset between clock edges and deassert it away from the active edge.",
+            "active_low": "Confirm the specified reset polarity; a signal name is only a hint.",
+            "width_signedness": "Check sign extension, intermediate widths, extrema, overflow and the specified truncation.",
+            "control_priority": "Exercise simultaneous control assertions and verify the priority specified by the task.",
+            "fsm": "Check every specified transition, output timing and any specified recovery behavior.",
+            "sequence": "Check overlapping matches and stream boundaries at the specified output cycle.",
+            "lfsr": "Check tap positions, shift direction, seed and any specified zero-state behavior.",
+            "handshake": "Check stalls, back-to-back transfers and state updates only on the specified acceptance event.",
+            "memory": "Check address boundaries, simultaneous accesses and the specified read/write latency and collision behavior.",
+            "latency": "Track expected outputs by cycle; distinguish combinational, registered and pipelined behavior.",
+        }
+        return "\n".join("- " + checks[tag] for tag in self.tags if tag in checks)
+
+
+def analyze_task(prompt: str, interface: str = "", contract: Contract | None = None) -> TaskProfile:
+    """Extract conservative RTL risk signals from task text and interface."""
+    text = uncomments(f"{prompt}\n{interface}").lower()
+    contract = contract or task_contract(prompt, interface)
+    ports = tuple(port.name for port in contract.ports)
+    tags: set[str] = set()
+
+    if re.search(r"\b(clk|clock|posedge|negedge)\b", text) or any(re.search(r"(?:^|_)(clk|clock)(?:_|$)", name, re.I) for name in ports):
+        tags.add("clocked")
+    if re.search(r"\b(reset|rst|reset_n|rst_n|resetn|rstn|clear)\b", text):
+        tags.add("reset")
+    if re.search(r"\basynchronous|async(?:hronous)?\b", text):
+        tags.add("async_reset")
+    if re.search(r"\b(active[- ]?low|low[- ]?active|(?:rst|reset)(?:_n|n|_ni))\b", text):
+        tags.add("active_low")
+    if re.search(r"\b(enable|en|valid|ready|load|clear|start|done)\b", text):
+        tags.add("control_priority")
+    if re.search(r"\b(signed|unsigned|overflow|underflow|carry|truncate|width|bit[- ]?width)\b", text):
+        tags.add("width_signedness")
+    if re.search(r"\b(add(?:er|ition)?|sum|subtract(?:or|ion)?|multiply|multiplier|divide|divider|modulo|arithmetic|counter|accumul(?:ate|ator|ation)?|popcount|count ones)\b|(?<=\w)\s*[+*%]\s*(?=\w)", text):
+        tags.add("arithmetic")
+    if re.search(r"\b(fsm|finite state|state machine|state transition)\b", text):
+        tags.add("fsm")
+    if re.search(r"\b(sequence|pattern|overlap|detector|shift register)\b", text):
+        tags.add("sequence")
+    if re.search(r"\b(lfsr|linear feedback)\b", text):
+        tags.add("lfsr")
+    if re.search(r"\b(memory|ram|rom|fifo|buffer|array)\b", text):
+        tags.add("memory")
+    if re.search(r"\b(latency|pipeline|throughput|one cycle|\d+ cycles?)\b", text):
+        tags.add("latency")
+    if re.search(r"\b(combinational|purely combinational|combinational logic)\b", text):
+        tags.add("combinational")
+    if re.search(r"\b(register|registered|sequential|clocked)\b", text):
+        tags.add("sequential")
+    if re.search(r"\b(valid|ready|handshake|backpressure)\b", text):
+        tags.add("handshake")
+    if re.search(r"\b(parameter|parameterized|generic|configurable)\b", text):
+        tags.add("parameterized")
+
+    if "clocked" in tags or "sequential" in tags or "reset" in tags:
+        style = "sequential"
+    elif "combinational" in tags:
+        style = "combinational"
+    else:
+        style = "mixed_or_unspecified"
+    return TaskProfile(contract.top, style, tuple(sorted(tags)), ports)
+
+
 def parse_ports(text: str, parameters: dict[str, int]) -> list[Port]:
     ports, direction, width, signed = [], None, 1, False
     for item in re.split(r",|;", text):

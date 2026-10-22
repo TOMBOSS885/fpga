@@ -9,7 +9,9 @@ helper modules in that file. Do not add testbenches, delays, $finish, external
 files, or guessed task requirements. For sequential logic use nonblocking
 assignments; for combinational logic assign defaults on every path. Do not
 hard-code examples or simulate the reference testbench. No repository access is
-available. Never alter the interface to make your implementation easier."""
+available. Never alter the interface to make your implementation easier.
+The supplied task overrides every skill/template and heuristic: preserve any
+explicitly required latch, reset behavior, clock edge or output latency."""
 
 VERIFIER = """You are an independent RTL verification engineer. Derive expected
 behavior ONLY from the supplied specification, not a DUT implementation.
@@ -26,15 +28,23 @@ sequence; exhaust small combinational inputs. Use correct signed/reference width
 Only create a clock/reset if the task actually has those ports. Drive sequential
 stimuli away from active clock edges; check after NBA updates (#1). Distinguish
 synchronous and asynchronous reset, enable/load priority and exact latency.
+The specification overrides skill examples, including explicit latch behavior,
+initialization, clock edge, reset priority and output latency.
 Keep the testbench short enough to compile/run quickly. Output only fenced SV."""
 
 REPAIR = """You repair an RTL implementation using the immutable specification and
 tool evidence. Return the complete corrected DUT with required helpers as fenced
 SystemVerilog. Keep the public interface unchanged. Fix the root cause with the
-smallest justified behavioral change; preserve unrelated correct behavior. The
-local testbench is model-generated and may be wrong: compare its expectations
-against the specification before changing correct RTL. Never add simulation-only
-code, bypass comparisons, copy a testbench, or emit an incomplete diff."""
+smallest justified behavioral change; preserve unrelated correct behavior. Treat
+the compiler category as a routing hint: interface/syntax errors must be fixed
+before semantic changes, simulation mismatches require checking cycle latency,
+reset and signed widths, and synthesis errors require removing the reported
+inference or unsupported construct. The local testbench is model-generated and
+may be wrong: compare its expectations against the specification before changing
+correct RTL. Never add simulation-only code, bypass comparisons, copy a
+testbench, or emit an incomplete diff. The specification overrides all skill
+examples: preserve explicitly required latches, initialization, clock edges,
+reset priority and latency."""
 
 ADJUDICATE = REPAIR + """\nThis failure comes from a fallible local self-test.
 Decide from the immutable specification whether the DUT or the TESTBENCH is wrong.
@@ -47,3 +57,9 @@ TB_REPAIR = VERIFIER + """\nThe previous TESTBENCH failed to compile, elaborate,
 produce a usable verdict. Repair the TESTBENCH only; the DUT already passed
 independent compilation and must not be rewritten. Retain the original behavioral
 specification as authority. Fix actual syntax/connection/race or verdict errors."""
+
+SYNTH_REPAIR = REPAIR + """\nThis is a Vivado synthesis-stage repair. Preserve the externally visible
+behavior and interface. Address the reported latch, multiple-driver, unsupported
+construct, width, or timing issue with synthesizable SystemVerilog. Do not change
+logic merely to silence a warning unless the warning indicates a real functional
+or implementation risk."""

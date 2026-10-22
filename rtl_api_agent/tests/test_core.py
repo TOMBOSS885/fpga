@@ -9,12 +9,12 @@ from dataclasses import replace
 from pathlib import Path
 from unittest.mock import patch
 
-from agent.artifacts import extract_sv, module_contract, preflight, task_contract, tb_shape
+from agent.artifacts import analyze_task, extract_sv, module_contract, preflight, task_contract, tb_shape
 from agent.client import Client, ModelError, Reply
 from agent.config import Config, canonical_url
 from agent.process import Deadline, run
 from agent.skills import select
-from agent.tools import Result, Toolchain, license_error, verdict
+from agent.tools import Result, Toolchain, classify_log, license_error, verdict
 from agent.trace import digest
 from agent.workflow import Workflow
 from support import BAD, DUT, PROMPT, TB, TraceStub, inference
@@ -29,8 +29,45 @@ class SkillTests(unittest.TestCase):
         self.assertIn('rtl-arithmetic-truncation',names)
         self.assertLessEqual(len(text),6000)
 
+    def test_profile_routes_rtl_risks_without_rewriting_prompt(self):
+        profile = analyze_task(
+            "Implement a 4-state FSM with an active-low asynchronous reset, signed accumulator, and valid/ready handshake."
+        )
+        self.assertEqual(profile.style, "sequential")
+        self.assertTrue({"fsm", "async_reset", "active_low", "arithmetic", "handshake"} <= set(profile.tags))
+        text, names = select(ROOT / "skill", "", profile=profile, phase="dut_repair")
+        self.assertIn("rtl-module-interface-contract", names)
+        self.assertIn("rtl-fsm-idioms", names)
+        self.assertIn("rtl-clock-reset-conventions", names)
+        self.assertLessEqual(len(text), 6000)
+
+    def test_specialized_risks_and_synthesis_feedback_select_relevant_skills(self):
+        cases = [
+            ("signed addition with overflow", "design", "", "rtl-arithmetic-truncation"),
+            ("active-low asynchronous reset", "design", "", "rtl-clock-reset-conventions"),
+            ("finite state machine", "design", "", "rtl-fsm-idioms"),
+            ("signed addition", "synth_repair", "synthesis", "rtl-synthesis-latch-prevention"),
+        ]
+        for prompt, phase, category, expected in cases:
+            with self.subTest(prompt=prompt, phase=phase):
+                _, names = select(ROOT / "skill", prompt, profile=analyze_task(prompt),
+                                  phase=phase, failure_category=category)
+                self.assertEqual(names[0], "rtl-module-interface-contract")
+                self.assertIn(expected, names)
+
 
 class ArtifactTests(unittest.TestCase):
+    def test_handshake_slash_is_not_arithmetic(self):
+        profile = analyze_task("A valid/ready handshake with stalls and backpressure.")
+        self.assertIn("handshake", profile.tags)
+        self.assertNotIn("arithmetic", profile.tags)
+
+    def test_accumulator_and_named_clock_reset_risks(self):
+        profile = analyze_task("signed accumulation", "module TopModule(input i_clk, input resetn, output y);")
+        self.assertTrue({"clocked", "reset", "active_low", "arithmetic", "width_signedness"} <= set(profile.tags))
+        self.assertEqual(profile.style, "sequential")
+        self.assertIn("specified reset polarity", profile.checks())
+
     def test_official_bullets_without_interface(self):
         spec = task_contract(PROMPT)
         self.assertEqual(spec.top, "TopModule")
@@ -128,6 +165,36 @@ class TransportTests(unittest.TestCase):
 
 
 class VerdictTests(unittest.TestCase):
+    def test_runtime_failure_and_rc_zero_license_are_environment(self):
+        for log in ["unexpected exception when evaluating tcl command",
+                    "error while loading shared libraries: libncurses.so.5",
+                    "A valid license was not found"]:
+            with self.subTest(log=log):
+                self.assertEqual(verdict(0, log + "\nTB_RESULT checks=8 errors=0").kind, "environment")
+                self.assertEqual(Toolchain._compile_result(0, log).kind, "environment")
+
+    def test_testbench_watchdog_timeout_is_a_simulation_failure(self):
+        result = verdict(0, "TB_FAILURE: timeout waiting for ready\nTB_RESULT checks=8 errors=0")
+        self.assertEqual((result.kind, result.category), ("mismatch", "simulation"))
+
+    def test_synthesis_phase_survives_generic_diagnostics(self):
+        result = Toolchain._compile_result(1, "command failed", phase="synthesis")
+        self.assertEqual((result.phase, result.category), ("synthesis", "synthesis"))
+        self.assertEqual(Workflow._repair_phase(result), "synth_repair")
+        category, code = classify_log("ERROR: [VRFC 10-2063] static elaboration failed", "lint")
+        self.assertEqual((category, code), ("elaboration", "VRFC 10-2063"))
+
+    def test_echoed_synthesis_command_does_not_count_as_completion(self):
+        result = Toolchain._synthesis_result(0, "puts {AGENT_SYNTH_SUCCESS}\nexit")
+        self.assertEqual(result.kind, "environment")
+        self.assertTrue(Toolchain._synthesis_result(0, "puts {AGENT_SYNTH_SUCCESS}\nAGENT_SYNTH_SUCCESS\n").ok)
+        self.assertFalse(Toolchain._synthesis_result(1, "AGENT_SYNTH_SUCCESS\n").ok)
+
+    def test_vivado_diagnostic_categories_are_repairable(self):
+        self.assertEqual(classify_log("[VRFC 10-3180] cannot find port rst", "lint")[0], "interface")
+        self.assertEqual(classify_log("[Synth 8-327] inferring latch for signal q", "synthesis")[0], "synthesis")
+        self.assertEqual(classify_log("TB_FAILURE mismatch at cycle 4", "simulation")[0], "simulation")
+
     def test_license_success_banner_not_error(self):
         self.assertFalse(license_error('A valid Vivado license has been detected. Releasing license: Vivado_Synthesis'))
         self.assertTrue(license_error('A valid license was not found'))
@@ -157,9 +224,9 @@ class WorkflowTests(unittest.TestCase):
     def perform(self, replies, lint=None, sim=None, synth=None):
         trace=TraceStub()
         class FakeClient:
-            def __init__(self): self.roles=[]; self.users=[]
+            def __init__(self): self.roles=[]; self.users=[]; self.systems=[]
             def chat(self,system,user,role,**kwargs):
-                self.roles.append(role); self.users.append(user)
+                self.roles.append(role); self.users.append(user); self.systems.append(system)
                 return Reply(replies.pop(0))
         class FakeTools:
             available=True
@@ -184,6 +251,34 @@ class WorkflowTests(unittest.TestCase):
     def test_environment_is_not_l1(self):
         _,_,result,_=self.perform([DUT],lint=[Result('environment')])
         self.assertEqual(result['internal_level'],0)
+
+    def test_synthesis_failure_uses_synthesis_prompt_and_skill(self):
+        from agent.prompts import SYNTH_REPAIR
+        failure = Result("design_error", "ERROR: [Synth 8-327] unsupported construct", "synthesis", "Synth 8-327", "synthesis")
+        client, trace, result, _ = self.perform([DUT, TB, DUT], synth=[failure, Result("ok")])
+        self.assertEqual(client.roles, ["design", "tb_generate", "synth_repair"])
+        self.assertEqual(client.systems[-1], SYNTH_REPAIR)
+        self.assertIn("rtl-synthesis-latch-prevention", client.users[-1])
+        self.assertIn("code=Synth 8-327", client.users[-1])
+        self.assertEqual(result["internal_level"], 3)
+        self.assertTrue(any(e.get("event") == "stage" and e.get("phase") == "synthesis" for e in trace.events))
+
+    def test_simulation_environment_stops_repairs_and_records_failure(self):
+        failure = Result("environment", "unexpected exception when evaluating tcl command", "environment", "runtime_failure", "simulation")
+        client, _, result, source = self.perform([DUT, TB], sim=[failure])
+        self.assertEqual(client.roles, ["design", "tb_generate"])
+        self.assertEqual((result["internal_level"], source), (1, DUT))
+        self.assertEqual(result["last_stage"], "simulation")
+        self.assertEqual(result["last_failure"]["diagnostic_code"], "runtime_failure")
+        self.assertIn("combinational", result["task_profile"]["tags"])
+
+    def test_failed_synthesis_repair_preserves_simulated_candidate(self):
+        _, _, result, source = self.perform(
+            [DUT, TB, BAD, BAD],
+            sim=[Result("ok"), Result("mismatch", "bad"), Result("mismatch", "bad")],
+            synth=[Result("design_error", "unsupported construct", "synthesis", "failure", "synthesis")])
+        self.assertEqual((source, result["internal_level"]), (DUT, 2))
+        self.assertFalse(result["synthesis_passed"])
 
     def test_tb_compile_failure_repairs_only_tb(self):
         client,_,result,source=self.perform([DUT,TB,TB],sim=[Result('testbench_error','testbench syntax'),Result('ok')])

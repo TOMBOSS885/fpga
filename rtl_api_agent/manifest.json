@@ -25,12 +25,14 @@
   "endpoints": {
     "solve": "./run.sh",
     "baseline": "./run_baseline.sh",
+    "terminal": "./terminal_agent.sh",
     "http_start": "./serve/start.sh",
     "http_port": 7860
   },
   "agent": {
     "architecture": "budgeted_rtl_tool_loop",
-    "roles": ["rtl_engineer", "independent_verifier", "dut_repair", "testbench_repair"],
+    "roles": ["rtl_engineer", "independent_verifier", "dut_compile_repair", "dut_repair", "synth_repair", "testbench_repair"],
+    "specialization": "specification_first_verilog_systemverilog_amd_rtl_track",
     "max_repairs": 3,
     "tools": ["check_interface", "xvlog", "xelab", "xsim", "vivado"],
     "verification_scope": "local_model_generated_oracle_not_official_score"

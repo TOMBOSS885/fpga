@@ -57,6 +57,35 @@ python3 -B -m serve.check_model
 
 这些是协议适配目标和常见地址，不是已经完成的后端实机验证。模型须支持 chat template。默认 `stream=false`；可用 `LLM_STREAM=1` 测试 SSE，但基线仍按官方脚本的固定请求执行。首轮接入建议先用非流式。
 
+## 终端可视化入口
+
+开发调试可以使用纯标准库的终端面板。它针对 Verilog/SystemVerilog 任务，直接调用同一份 `run.sh` 工作流，不改变官方提交入口。面板支持编辑模型端点、模型 ID、上下文/输出上限、修复预算、`xczu3eg-sbva484-1-e` 器件、5 ns 时钟和 Vivado 路径；运行中会增量显示 `trace.jsonl` 的模型、`xvlog`、`xelab`、`xsim`、综合和 checkpoint 事件。
+
+```bash
+cd rtl_api_agent
+./terminal_agent.sh --input ../rtlagent2026/tasks/ex01_popcount8 --output /tmp/rtl-ui
+```
+
+面板按 `r` 开始运行，上下键滚动选择全部配置，`e` 或回车编辑当前行，`s` 保存 `.rtl-agent.json`，`d` 刷新 Vivado 状态，`q` 退出（运行中不会误停任务）。80×24 窗口采用上下布局，宽窗口分栏。当前阶段、剩余预算、RTL 风险、所选技能和最近故障会单独显示；本地等级明确标注为非官方成绩。编译、仿真、综合预算可分别配置为 `AGENT_LINT_S`、`AGENT_SIM_S`、`AGENT_SYNTH_S`，均受单题总预算约束。也可以完全脚本化：
+
+```bash
+./terminal_agent.sh --no-ui \
+  --input ../rtlagent2026/tasks/ex01_popcount8 --output /tmp/rtl-cli \
+  --set LLM_BASE_URL=http://127.0.0.1:8000/v1 \
+  --set LLM_MODEL=your-local-model
+./terminal_agent.sh --doctor --no-ui
+```
+
+`--doctor` 检查当前 `vivado`、`xvlog`、`xelab`、`xsim` 的路径、版本和运行进程，在临时目录启动版本探测，不打开 GUI 或修改工程。“找到工具”不代表许可证、实际仿真和综合通过。工具发现顺序为 `VIVADO_BIN`、`XILINX_VIVADO/bin`、已有 `PATH`、本机及官方镜像常见路径；显式配置错误不会悄悄切换到另一安装版本。API key 只从现有环境变量/密钥文件继承，终端配置文件不会保存它，也拒绝在 URL 中保存凭据。
+
+运行输出保存在所选目录中，`console.log` 记录面板启动的脚本输出。每次运行使用独立 nonce 读取当前轨迹，复用输出目录时不会把上一次的结束状态当成这一次的结果。
+
+## Verilog 专项策略
+
+参考本地 OpenCode 的工具事件与状态显示方式，保留单模型、有界控制流。原题始终完整保留；根据端口和题面识别位宽/有符号、时钟复位、FSM、序列、握手和存储器等风险，按阶段选择最多三个技能，并为独立自测列出适用检查点。详见 [skill/README.md](skill/README.md)。
+
+技能模板服从原题：保留规定的下降沿、锁存器、初始化、控制优先级、LFSR 种子和输出延迟。接口/语法、仿真、综合分别进入对应修复；许可证、运行库和工具崩溃停止代码修复。综合要求实际输出完成标记，后续失败修改不能覆盖已达到更高验证等级的 RTL。
+
 agent 默认输出上限 4096 tokens；官方基线固定请求 8192 tokens。服务端上下文应给题面、系统提示与这些输出留足空间，两种模式必须共用同一份后端上下文配置。客户端的 token 估计不是精确 tokenizer，复杂题不要把上下文配置压到边界。
 
 ## 文件入口与产物
