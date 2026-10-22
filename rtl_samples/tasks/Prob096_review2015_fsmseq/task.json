@@ -1,0 +1,12 @@
+{
+  "task_id": "Prob096_review2015_fsmseq",
+  "top": "TopModule",
+  "part": "xczu3eg-sbva484-1-e",
+  "period_ns": 5,
+  "reference_module": "ref.sv",
+  "testbench": "tb.sv",
+  "tb_top": "tb",
+  "extra_files": [],
+  "reference": "reference/solution.sv",
+  "source": "VerilogEval v2 dataset_spec-to-rtl"
+}

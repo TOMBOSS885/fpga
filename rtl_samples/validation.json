@@ -1,0 +1,176 @@
+{
+  "date": "2026-10-22",
+  "vivado_bin": "/home/q/vivado26.1/2026.1/Vivado/bin",
+  "scope": "Eight representative reference fixtures compiled with xvlog + xelab; one quarantined fixture checked for its known port mismatch. No behavioral simulation, synthesis or model solve was performed. All EDA working directories were temporary and cleaned.",
+  "compiler_arguments": {
+    "xvlog": [
+      "--sv",
+      "solution.sv",
+      "ref.sv",
+      "tb.sv"
+    ],
+    "xelab": [
+      "tb",
+      "-s",
+      "fixture_check",
+      "-timescale",
+      "1ps/1ps"
+    ]
+  },
+  "results": [
+    {
+      "task_id": "Prob009_popcount3",
+      "fixture": "tasks",
+      "stages": [
+        {
+          "tool": "xvlog",
+          "rc": 0,
+          "elapsed_s": 1.018
+        },
+        {
+          "tool": "xelab",
+          "rc": 0,
+          "elapsed_s": 1.121
+        }
+      ],
+      "compiled": true
+    },
+    {
+      "task_id": "Prob027_fadd",
+      "fixture": "tasks",
+      "stages": [
+        {
+          "tool": "xvlog",
+          "rc": 0,
+          "elapsed_s": 1.01
+        },
+        {
+          "tool": "xelab",
+          "rc": 0,
+          "elapsed_s": 1.124
+        }
+      ],
+      "compiled": true
+    },
+    {
+      "task_id": "Prob041_dff8r",
+      "fixture": "tasks",
+      "stages": [
+        {
+          "tool": "xvlog",
+          "rc": 0,
+          "elapsed_s": 0.926
+        },
+        {
+          "tool": "xelab",
+          "rc": 0,
+          "elapsed_s": 1.119
+        }
+      ],
+      "compiled": true
+    },
+    {
+      "task_id": "Prob047_dff8ar",
+      "fixture": "tasks",
+      "stages": [
+        {
+          "tool": "xvlog",
+          "rc": 0,
+          "elapsed_s": 1.008
+        },
+        {
+          "tool": "xelab",
+          "rc": 0,
+          "elapsed_s": 1.116
+        }
+      ],
+      "compiled": true
+    },
+    {
+      "task_id": "Prob086_lfsr5",
+      "fixture": "tasks",
+      "stages": [
+        {
+          "tool": "xvlog",
+          "rc": 0,
+          "elapsed_s": 1.003
+        },
+        {
+          "tool": "xelab",
+          "rc": 0,
+          "elapsed_s": 1.133
+        }
+      ],
+      "compiled": true
+    },
+    {
+      "task_id": "Prob096_review2015_fsmseq",
+      "fixture": "tasks",
+      "stages": [
+        {
+          "tool": "xvlog",
+          "rc": 0,
+          "elapsed_s": 1.0
+        },
+        {
+          "tool": "xelab",
+          "rc": 0,
+          "elapsed_s": 1.065
+        }
+      ],
+      "compiled": true
+    },
+    {
+      "task_id": "Prob115_shift18",
+      "fixture": "tasks",
+      "stages": [
+        {
+          "tool": "xvlog",
+          "rc": 0,
+          "elapsed_s": 1.014
+        },
+        {
+          "tool": "xelab",
+          "rc": 0,
+          "elapsed_s": 1.127
+        }
+      ],
+      "compiled": true
+    },
+    {
+      "task_id": "Prob146_fsm_serialdata",
+      "fixture": "tasks",
+      "stages": [
+        {
+          "tool": "xvlog",
+          "rc": 0,
+          "elapsed_s": 0.922
+        },
+        {
+          "tool": "xelab",
+          "rc": 0,
+          "elapsed_s": 1.133
+        }
+      ],
+      "compiled": true
+    },
+    {
+      "task_id": "Prob099_m2014_q6c",
+      "fixture": "known_issues",
+      "stages": [
+        {
+          "tool": "xvlog",
+          "rc": 0,
+          "elapsed_s": 1.009
+        },
+        {
+          "tool": "xelab",
+          "rc": 1,
+          "elapsed_s": 1.021,
+          "diagnostic": "ERROR: [VRFC 10-3180] cannot find port 'Y4' on this module [/tmp/rtl_sample_compile_a3xdfys5/tb.sv:71]\nERROR: [VRFC 10-3180] cannot find port 'Y2' on this module [/tmp/rtl_sample_compile_a3xdfys5/tb.sv:70]\nERROR: [VRFC 10-3180] cannot find port 'Y4' on this module [/tmp/rtl_sample_compile_a3xdfys5/tb.sv:77]\nERROR: [VRFC 10-3180] cannot find port 'Y2' on this module [/tmp/rtl_sample_compile_a3xdfys5/tb.sv:76]\nERROR: [XSIM 43-3322] Static elaboration of top level Verilog design unit(s) in library work failed."
+        }
+      ],
+      "compiled": false
+    }
+  ]
+}

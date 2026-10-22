@@ -1,0 +1,811 @@
+{
+  "schema_version": 1,
+  "track": "rtl",
+  "source": {
+    "repository": "https://github.com/NVlabs/verilog-eval",
+    "revision": "c498220d0a52248f8e3fdffe279075215bde2da6",
+    "dataset": "dataset_spec-to-rtl",
+    "license": "LICENSE",
+    "checksums": "official/verilog-eval-v2/SHA256SUMS"
+  },
+  "converter": {
+    "path": "../rtlagent2026/selftest/veval_import.py",
+    "sha256": "053b29b9019b7c97a5e68286bea272db17aa4faf61db697abdfa333594cd836b"
+  },
+  "part": "xczu3eg-sbva484-1-e",
+  "period_ns": 5,
+  "counts": {
+    "source": 156,
+    "included": 155,
+    "quarantined": 1
+  },
+  "transformations": [
+    "Normalize prompt outer whitespace using the official importer; do not add interface.txt.",
+    "Remove the waveform-only $dumpfile/$dumpvars initial block for xvlog compatibility.",
+    "Rename RefModule to TopModule only in reference/solution.sv for judge-chain checks."
+  ],
+  "validation_scope": "Public development samples; inclusion does not certify functional or synthesis correctness.",
+  "tasks": [
+    {
+      "task_id": "Prob001_zero",
+      "path": "tasks/Prob001_zero",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob002_m2014_q4i",
+      "path": "tasks/Prob002_m2014_q4i",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob003_step_one",
+      "path": "tasks/Prob003_step_one",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob004_vector2",
+      "path": "tasks/Prob004_vector2",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob005_notgate",
+      "path": "tasks/Prob005_notgate",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob006_vectorr",
+      "path": "tasks/Prob006_vectorr",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob007_wire",
+      "path": "tasks/Prob007_wire",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob008_m2014_q4h",
+      "path": "tasks/Prob008_m2014_q4h",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob009_popcount3",
+      "path": "tasks/Prob009_popcount3",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob010_mt2015_q4a",
+      "path": "tasks/Prob010_mt2015_q4a",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob011_norgate",
+      "path": "tasks/Prob011_norgate",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob012_xnorgate",
+      "path": "tasks/Prob012_xnorgate",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob013_m2014_q4e",
+      "path": "tasks/Prob013_m2014_q4e",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob014_andgate",
+      "path": "tasks/Prob014_andgate",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob015_vector1",
+      "path": "tasks/Prob015_vector1",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob016_m2014_q4j",
+      "path": "tasks/Prob016_m2014_q4j",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob017_mux2to1v",
+      "path": "tasks/Prob017_mux2to1v",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob018_mux256to1",
+      "path": "tasks/Prob018_mux256to1",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob019_m2014_q4f",
+      "path": "tasks/Prob019_m2014_q4f",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob020_mt2015_eq2",
+      "path": "tasks/Prob020_mt2015_eq2",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob021_mux256to1v",
+      "path": "tasks/Prob021_mux256to1v",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob022_mux2to1",
+      "path": "tasks/Prob022_mux2to1",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob023_vector100r",
+      "path": "tasks/Prob023_vector100r",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob024_hadd",
+      "path": "tasks/Prob024_hadd",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob025_reduction",
+      "path": "tasks/Prob025_reduction",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob026_alwaysblock1",
+      "path": "tasks/Prob026_alwaysblock1",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob027_fadd",
+      "path": "tasks/Prob027_fadd",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob028_m2014_q4a",
+      "path": "tasks/Prob028_m2014_q4a",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob029_m2014_q4g",
+      "path": "tasks/Prob029_m2014_q4g",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob030_popcount255",
+      "path": "tasks/Prob030_popcount255",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob031_dff",
+      "path": "tasks/Prob031_dff",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob032_vector0",
+      "path": "tasks/Prob032_vector0",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob033_ece241_2014_q1c",
+      "path": "tasks/Prob033_ece241_2014_q1c",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob034_dff8",
+      "path": "tasks/Prob034_dff8",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob035_count1to10",
+      "path": "tasks/Prob035_count1to10",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob036_ringer",
+      "path": "tasks/Prob036_ringer",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob037_review2015_count1k",
+      "path": "tasks/Prob037_review2015_count1k",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob038_count15",
+      "path": "tasks/Prob038_count15",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob039_always_if",
+      "path": "tasks/Prob039_always_if",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob040_count10",
+      "path": "tasks/Prob040_count10",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob041_dff8r",
+      "path": "tasks/Prob041_dff8r",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob042_vector4",
+      "path": "tasks/Prob042_vector4",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob043_vector5",
+      "path": "tasks/Prob043_vector5",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob044_vectorgates",
+      "path": "tasks/Prob044_vectorgates",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob045_edgedetect2",
+      "path": "tasks/Prob045_edgedetect2",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob046_dff8p",
+      "path": "tasks/Prob046_dff8p",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob047_dff8ar",
+      "path": "tasks/Prob047_dff8ar",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob048_m2014_q4c",
+      "path": "tasks/Prob048_m2014_q4c",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob049_m2014_q4b",
+      "path": "tasks/Prob049_m2014_q4b",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob050_kmap1",
+      "path": "tasks/Prob050_kmap1",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob051_gates4",
+      "path": "tasks/Prob051_gates4",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob052_gates100",
+      "path": "tasks/Prob052_gates100",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob053_m2014_q4d",
+      "path": "tasks/Prob053_m2014_q4d",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob054_edgedetect",
+      "path": "tasks/Prob054_edgedetect",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob055_conditional",
+      "path": "tasks/Prob055_conditional",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob056_ece241_2013_q7",
+      "path": "tasks/Prob056_ece241_2013_q7",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob057_kmap2",
+      "path": "tasks/Prob057_kmap2",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob058_alwaysblock2",
+      "path": "tasks/Prob058_alwaysblock2",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob059_wire4",
+      "path": "tasks/Prob059_wire4",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob060_m2014_q4k",
+      "path": "tasks/Prob060_m2014_q4k",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob061_2014_q4a",
+      "path": "tasks/Prob061_2014_q4a",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob062_bugs_mux2",
+      "path": "tasks/Prob062_bugs_mux2",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob063_review2015_shiftcount",
+      "path": "tasks/Prob063_review2015_shiftcount",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob064_vector3",
+      "path": "tasks/Prob064_vector3",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob065_7420",
+      "path": "tasks/Prob065_7420",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob066_edgecapture",
+      "path": "tasks/Prob066_edgecapture",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob067_countslow",
+      "path": "tasks/Prob067_countslow",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob068_countbcd",
+      "path": "tasks/Prob068_countbcd",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob069_truthtable1",
+      "path": "tasks/Prob069_truthtable1",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob070_ece241_2013_q2",
+      "path": "tasks/Prob070_ece241_2013_q2",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob071_always_casez",
+      "path": "tasks/Prob071_always_casez",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob072_thermostat",
+      "path": "tasks/Prob072_thermostat",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob073_dff16e",
+      "path": "tasks/Prob073_dff16e",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob074_ece241_2014_q4",
+      "path": "tasks/Prob074_ece241_2014_q4",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob075_counter_2bc",
+      "path": "tasks/Prob075_counter_2bc",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob076_always_case",
+      "path": "tasks/Prob076_always_case",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob077_wire_decl",
+      "path": "tasks/Prob077_wire_decl",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob078_dualedge",
+      "path": "tasks/Prob078_dualedge",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob079_fsm3onehot",
+      "path": "tasks/Prob079_fsm3onehot",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob080_timer",
+      "path": "tasks/Prob080_timer",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob081_7458",
+      "path": "tasks/Prob081_7458",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob082_lfsr32",
+      "path": "tasks/Prob082_lfsr32",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob083_mt2015_q4b",
+      "path": "tasks/Prob083_mt2015_q4b",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob084_ece241_2013_q12",
+      "path": "tasks/Prob084_ece241_2013_q12",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob085_shift4",
+      "path": "tasks/Prob085_shift4",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob086_lfsr5",
+      "path": "tasks/Prob086_lfsr5",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob087_gates",
+      "path": "tasks/Prob087_gates",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob088_ece241_2014_q5b",
+      "path": "tasks/Prob088_ece241_2014_q5b",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob089_ece241_2014_q5a",
+      "path": "tasks/Prob089_ece241_2014_q5a",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob090_circuit1",
+      "path": "tasks/Prob090_circuit1",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob091_2012_q2b",
+      "path": "tasks/Prob091_2012_q2b",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob092_gatesv100",
+      "path": "tasks/Prob092_gatesv100",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob093_ece241_2014_q3",
+      "path": "tasks/Prob093_ece241_2014_q3",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob094_gatesv",
+      "path": "tasks/Prob094_gatesv",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob095_review2015_fsmshift",
+      "path": "tasks/Prob095_review2015_fsmshift",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob096_review2015_fsmseq",
+      "path": "tasks/Prob096_review2015_fsmseq",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob097_mux9to1v",
+      "path": "tasks/Prob097_mux9to1v",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob098_circuit7",
+      "path": "tasks/Prob098_circuit7",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob099_m2014_q6c",
+      "path": "known_issues/Prob099_m2014_q6c",
+      "status": "quarantined",
+      "reason": "The prompt port list and RefModule declare Y1/Y3, but the testbench connects Y2/Y4. The prompt body also contradicts its own port list. Preserved without semantic edits and excluded from tasks/."
+    },
+    {
+      "task_id": "Prob100_fsm3comb",
+      "path": "tasks/Prob100_fsm3comb",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob101_circuit4",
+      "path": "tasks/Prob101_circuit4",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob102_circuit3",
+      "path": "tasks/Prob102_circuit3",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob103_circuit2",
+      "path": "tasks/Prob103_circuit2",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob104_mt2015_muxdff",
+      "path": "tasks/Prob104_mt2015_muxdff",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob105_rotate100",
+      "path": "tasks/Prob105_rotate100",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob106_always_nolatches",
+      "path": "tasks/Prob106_always_nolatches",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob107_fsm1s",
+      "path": "tasks/Prob107_fsm1s",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob108_rule90",
+      "path": "tasks/Prob108_rule90",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob109_fsm1",
+      "path": "tasks/Prob109_fsm1",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob110_fsm2",
+      "path": "tasks/Prob110_fsm2",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob111_fsm2s",
+      "path": "tasks/Prob111_fsm2s",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob112_always_case2",
+      "path": "tasks/Prob112_always_case2",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob113_2012_q1g",
+      "path": "tasks/Prob113_2012_q1g",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob114_bugs_case",
+      "path": "tasks/Prob114_bugs_case",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob115_shift18",
+      "path": "tasks/Prob115_shift18",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob116_m2014_q3",
+      "path": "tasks/Prob116_m2014_q3",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob117_circuit9",
+      "path": "tasks/Prob117_circuit9",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob118_history_shift",
+      "path": "tasks/Prob118_history_shift",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob119_fsm3",
+      "path": "tasks/Prob119_fsm3",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob120_fsm3s",
+      "path": "tasks/Prob120_fsm3s",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob121_2014_q3bfsm",
+      "path": "tasks/Prob121_2014_q3bfsm",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob122_kmap4",
+      "path": "tasks/Prob122_kmap4",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob123_bugs_addsubz",
+      "path": "tasks/Prob123_bugs_addsubz",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob124_rule110",
+      "path": "tasks/Prob124_rule110",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob125_kmap3",
+      "path": "tasks/Prob125_kmap3",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob126_circuit6",
+      "path": "tasks/Prob126_circuit6",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob127_lemmings1",
+      "path": "tasks/Prob127_lemmings1",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob128_fsm_ps2",
+      "path": "tasks/Prob128_fsm_ps2",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob129_ece241_2013_q8",
+      "path": "tasks/Prob129_ece241_2013_q8",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob130_circuit5",
+      "path": "tasks/Prob130_circuit5",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob131_mt2015_q4",
+      "path": "tasks/Prob131_mt2015_q4",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob132_always_if2",
+      "path": "tasks/Prob132_always_if2",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob133_2014_q3fsm",
+      "path": "tasks/Prob133_2014_q3fsm",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob134_2014_q3c",
+      "path": "tasks/Prob134_2014_q3c",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob135_m2014_q6b",
+      "path": "tasks/Prob135_m2014_q6b",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob136_m2014_q6",
+      "path": "tasks/Prob136_m2014_q6",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob137_fsm_serial",
+      "path": "tasks/Prob137_fsm_serial",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob138_2012_q2fsm",
+      "path": "tasks/Prob138_2012_q2fsm",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob139_2013_q2bfsm",
+      "path": "tasks/Prob139_2013_q2bfsm",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob140_fsm_hdlc",
+      "path": "tasks/Prob140_fsm_hdlc",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob141_count_clock",
+      "path": "tasks/Prob141_count_clock",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob142_lemmings2",
+      "path": "tasks/Prob142_lemmings2",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob143_fsm_onehot",
+      "path": "tasks/Prob143_fsm_onehot",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob144_conwaylife",
+      "path": "tasks/Prob144_conwaylife",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob145_circuit8",
+      "path": "tasks/Prob145_circuit8",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob146_fsm_serialdata",
+      "path": "tasks/Prob146_fsm_serialdata",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob147_circuit10",
+      "path": "tasks/Prob147_circuit10",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob148_2013_q2afsm",
+      "path": "tasks/Prob148_2013_q2afsm",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob149_ece241_2013_q4",
+      "path": "tasks/Prob149_ece241_2013_q4",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob150_review2015_fsmonehot",
+      "path": "tasks/Prob150_review2015_fsmonehot",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob151_review2015_fsm",
+      "path": "tasks/Prob151_review2015_fsm",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob152_lemmings3",
+      "path": "tasks/Prob152_lemmings3",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob153_gshare",
+      "path": "tasks/Prob153_gshare",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob154_fsm_ps2data",
+      "path": "tasks/Prob154_fsm_ps2data",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob155_lemmings4",
+      "path": "tasks/Prob155_lemmings4",
+      "status": "included"
+    },
+    {
+      "task_id": "Prob156_review2015_fancytimer",
+      "path": "tasks/Prob156_review2015_fancytimer",
+      "status": "included"
+    }
+  ]
+}
