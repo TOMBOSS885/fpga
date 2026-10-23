@@ -1,0 +1,556 @@
+{
+  "development_only": true,
+  "suite": "regression",
+  "samples_per_mode": 1,
+  "split": "known development regression; NOT unseen holdout",
+  "input_isolation": "Only prompt.txt and interface.txt copied to generation input; reference code not sent to model. This is input separation, not OS filesystem sandboxing.",
+  "source_sha256": {
+    "agent/__init__.py": "65e27ccdc5dd261f3a8ae340a92d86f7eeace588d3f4d82482df38178ca81d2b",
+    "agent/budget_controller.py": "44996da9d1f657fe744aa85f364b6c8a11305975c113d35edc6e33da516ca697",
+    "agent/coder_agent.py": "fb8b385b419f754b69bec86969e8b259c3bd4a1dc778a59a2cd852f97fcba6ac",
+    "agent/deterministic_guard.py": "8c607e602cdfe1d52aed1afb816cc9e3fb964f2cdb786e06b0bbad12e52b760d",
+    "agent/diagnostic_pruner.py": "4b831431f45f8a6dddb71ff3bc281db2c27cbfa2c96aa3f6886637dc050bcecd",
+    "agent/diff_patcher.py": "70872b346632baf59bacecb2273debb425c62a01f86b8e782201f9c610ebec6f",
+    "agent/llm.py": "a51b8c47737fca24dd115af42cf0368c27fdae8dfa0aacb777d8b883e7150f3b",
+    "agent/main.py": "06ed00b6857fa116611b4b5272c8fd39ab13dfc4f77b1b8def6949166b8ccb4e",
+    "agent/orchestrator.py": "a7397b3e2177652f8becd4cd35b8c7b8821a0ea49ef2ae3cdf2b6522de50167c",
+    "agent/oscillation_guard.py": "2d90dd9247fd69ff8cdc1172463cb8f20c83e5b79ddf961942c8c79e2c343b56",
+    "agent/repair_agent.py": "ac8e136fe1c4d7b971e15c279c43bd2979c4b8774a2fec4247e46878ccf2b587",
+    "agent/skills.py": "8b8d686da2bc99aa6ce3e21d60756059f82e4be26dca369851bbc9e67f752e99",
+    "agent/spec_agent.py": "f72171bec19a0a0ebda310bb14148411df2aa2ffd4739e7d82a51d135d0f26b7",
+    "agent/tools.py": "7b92fdefb50969d972b81da72cd99fb41e3cb2c197168c1e74b61e218e954889",
+    "agent/verifier_agent.py": "9f628f34566bf7262a5c141d323fb3bec7e1a139bf56450f105b5c2f8e672f1f",
+    "skill/rtl-arithmetic-truncation/SKILL.md": "d4db53b5d4131009aec09a66cae3c5b45d2fe10b767a357e16e3731da908c50c",
+    "skill/rtl-clock-reset-conventions/SKILL.md": "0df6c1cd8c7c74d0f1d771e57d87aa46b916a3ef3ed211ca18b3ce41c0d290ca",
+    "skill/rtl-control-priority-pattern/SKILL.md": "cfe6f64dc4669897066a3782c52f58759ce71982db9006afd63caa5b5bce2e2c",
+    "skill/rtl-fsm-idioms/SKILL.md": "df5d0f4b9b31514f4c1f171b973a2f717e69238937fde9f748b71d0bd30a5fce",
+    "skill/rtl-golden-scoreboard-verifier/SKILL.md": "1cdbc9c15bbcdccebb534bda592d6161c53591cccafce393fadd02523873a015",
+    "skill/rtl-interface-contract/SKILL.md": "bec0f218b117e79c23856e61c8777ea30e416d4bb40b2f880a73542e275dd215",
+    "skill/rtl-self-testbench-generator/SKILL.md": "f34111d9d323224a26ff0448cbb28d045d27de4c045be91fc3f059b355610261",
+    "skill/rtl-shift-register-pattern/SKILL.md": "192b1591dfeed3190c28efd3db648e7358a7b26078c80f519055fdcd18f37944",
+    "skill/rtl-synthesis-latch-prevention/SKILL.md": "02425049497cc004111fe4ecc4bba794b4834017467e9fd0372a880a0e34be8e",
+    "evaluation/dataset/h01_alu/interface.txt": "d32326ca3e7ef50e49143315aa4787ab89320bd685f93fd889687970360f0889",
+    "evaluation/dataset/h01_alu/positive_fixture.sv": "40793c855037cb00f8c35c5298eff1600021d417ff4ce2c2fcd628afa9cc2e36",
+    "evaluation/dataset/h01_alu/prompt.txt": "9e2da262c601a9bae502f402610a2905f3756211844f31b2be1838c558ebf5c6",
+    "evaluation/dataset/h01_alu/ref.sv": "01a77824637b630b5c0b22460fdb861d76883924185e525adbb837e179b1302f",
+    "evaluation/dataset/h01_alu/task.json": "2eb282c66768bc36a2b14fe9e98f191560abcd35463996f13e06c620e9055570",
+    "evaluation/dataset/h01_alu/tb.sv": "87687e1df4616b903fd9417ea66b96c5484eab28d3abdb8ac88e875f8f0f7e96",
+    "evaluation/dataset/h02_saturating_add/interface.txt": "831b05271d281d15bf0df624beb15d0ae551f2e95eda0a8187101da19c9a2e56",
+    "evaluation/dataset/h02_saturating_add/positive_fixture.sv": "64d489c7c24e7d1d3a4b1d100e2ae40e017942a704cb0321a550d524f0f1bfb8",
+    "evaluation/dataset/h02_saturating_add/prompt.txt": "6b8752ad68550859a474dcfe07b777f85473028412ba849b64406b6dc56dfb8c",
+    "evaluation/dataset/h02_saturating_add/ref.sv": "01a77824637b630b5c0b22460fdb861d76883924185e525adbb837e179b1302f",
+    "evaluation/dataset/h02_saturating_add/task.json": "702681cd109e697fc7a47ece8e40840ad3dface546eb4058d9dde2408ef6c5d0",
+    "evaluation/dataset/h02_saturating_add/tb.sv": "de8cb85262e9b6ba92cc9b5892c6fa465635cea01992ea2f7ecfe808bf00e847",
+    "evaluation/dataset/h03_priority_counter/interface.txt": "a297f0e74f5d56ace0e4266e306033b4fc33874b75e04d465ffe741cb65c4127",
+    "evaluation/dataset/h03_priority_counter/positive_fixture.sv": "5b5ae826f386b4e129c36325affad39e623a0c099df8cc9978755e9ebfd4418f",
+    "evaluation/dataset/h03_priority_counter/prompt.txt": "35048ba283fc99c8324768d97a8236b4dc7900b2b0bdc32fc1dc0a7c0956623a",
+    "evaluation/dataset/h03_priority_counter/ref.sv": "01a77824637b630b5c0b22460fdb861d76883924185e525adbb837e179b1302f",
+    "evaluation/dataset/h03_priority_counter/task.json": "592b057fbc1a8d408ae076510cdb4307d85f667f150ec24c4ee119819ab0296d",
+    "evaluation/dataset/h03_priority_counter/tb.sv": "0ab5d119019e2d1f780c1099cd4783de8f02836d2fc4fa65884811a7e74e063f",
+    "evaluation/dataset/h04_enabled_pipeline/interface.txt": "8f99378b7256eb7218f101677497247b46f7abdfa1013bbe692964ceea5d0ef6",
+    "evaluation/dataset/h04_enabled_pipeline/positive_fixture.sv": "e3bf6241fa91f30fcd94fb0ee085da1a7606744de553673e2faefba30dc60bc6",
+    "evaluation/dataset/h04_enabled_pipeline/prompt.txt": "7df7113696602be1f999cd525b0e594aa1a203362c075484e6c280537b025555",
+    "evaluation/dataset/h04_enabled_pipeline/ref.sv": "01a77824637b630b5c0b22460fdb861d76883924185e525adbb837e179b1302f",
+    "evaluation/dataset/h04_enabled_pipeline/task.json": "a03845bf3c4e73361b79caa361d44e47229c1361cc1f64c75c6dc0f30d7bb131",
+    "evaluation/dataset/h04_enabled_pipeline/tb.sv": "05c29c962575fb0753781bb33a1d8954b51b183fa65672bd5deefe17de6b0333",
+    "evaluation/dataset/h05_pattern_0110/interface.txt": "48bf20b6113a6988849a8e6eaeee562c6bc285564c5a78dee5770d167abe1cd4",
+    "evaluation/dataset/h05_pattern_0110/positive_fixture.sv": "d154d103fdc3963b2789dde10058ab24d4582a19732b00e5d13d1d293385bdf0",
+    "evaluation/dataset/h05_pattern_0110/prompt.txt": "3d68a0dc8aef747ac7169fb419014e83d339c846e264078b4d30c6358062edef",
+    "evaluation/dataset/h05_pattern_0110/ref.sv": "01a77824637b630b5c0b22460fdb861d76883924185e525adbb837e179b1302f",
+    "evaluation/dataset/h05_pattern_0110/task.json": "c14a34f5d7fa72e2bec829f22b0a5fab94859de33d744cd547d5259a4ca27512",
+    "evaluation/dataset/h05_pattern_0110/tb.sv": "3aa1dae7784b9cee2b9b1e101a0dcec4b13708609605f2708fc0c3f6ce48b191",
+    "evaluation/dataset/h06_pattern_1001001/interface.txt": "48bf20b6113a6988849a8e6eaeee562c6bc285564c5a78dee5770d167abe1cd4",
+    "evaluation/dataset/h06_pattern_1001001/positive_fixture.sv": "2e404e273e1c60e1174a10a2d0b549a03caa9ca3387571f33e641799f2c379bc",
+    "evaluation/dataset/h06_pattern_1001001/prompt.txt": "c4f263906b41db4aca0d4e9de997ec531705e9f9110ccd5efac2dfadaddb0ce7",
+    "evaluation/dataset/h06_pattern_1001001/ref.sv": "01a77824637b630b5c0b22460fdb861d76883924185e525adbb837e179b1302f",
+    "evaluation/dataset/h06_pattern_1001001/task.json": "479540fc0cac3bbed5979f42dbee5add3a7665ab5967221aaf736432ef065432",
+    "evaluation/dataset/h06_pattern_1001001/tb.sv": "d496aede22063c42efcffd4d20f08af25557ac30059387914aefc853a91205d7",
+    "evaluation/run_evaluation.py": "5e8c325753a5484a55f690a305d055dde233f750c744764e8108deef735c05a5"
+  },
+  "baseline_sha256": "537783e39db22079c33c19af475dbdb760a29ff1656a48c481d434131f84fb51",
+  "results": [
+    {
+      "level": "L0",
+      "coefficient": 0.0,
+      "status": "CODE_ERROR",
+      "stage_exit_codes": {
+        "xvlog": 1
+      },
+      "failed_stage": "xvlog",
+      "task": "h01_alu",
+      "mode": "baseline",
+      "generation_rc": 0,
+      "generation_elapsed_s": 3.047,
+      "total_elapsed_s": 3.547,
+      "model_calls": 1,
+      "successful_model_calls": 1,
+      "solution_sha256": "0619e9d9490964f1c9e4f918f25c872c97e2cfb2236d5babb1e4671fb899a0dd",
+      "internal_finish": null
+    },
+    {
+      "level": "L3",
+      "coefficient": 1.0,
+      "status": "OK",
+      "stage_exit_codes": {
+        "xvlog": 0,
+        "xelab": 0,
+        "xsim": 0,
+        "synth": 0
+      },
+      "mismatches": 0,
+      "samples": 320,
+      "synthesis": {
+        "status": "OK",
+        "LUT": 16,
+        "FF": 0,
+        "DSP": 0,
+        "BRAM": 0,
+        "SRL": 0,
+        "CARRY": 1,
+        "MUXF": 0,
+        "has_clk": 0,
+        "WNS_ns": "",
+        "Fmax_MHz": ""
+      },
+      "task": "h01_alu",
+      "mode": "agent",
+      "generation_rc": 0,
+      "generation_elapsed_s": 47.687,
+      "total_elapsed_s": 76.093,
+      "model_calls": 3,
+      "successful_model_calls": 3,
+      "solution_sha256": "88cf266fe55b610acb5e10c2d29605c8a59dfd7f3597e9620129ee81ac04fe9c",
+      "internal_finish": {
+        "tool": "orchestrator",
+        "event": "finished",
+        "delivered_level": 1,
+        "verification_scope": "internal_milestone_not_official_score",
+        "bytes": 494,
+        "solution_sha256": "d9c20d68c13bd6bc9dbb47f822adf530b1528fe02bc1b1f44fcc49d9949ae905",
+        "reason": "local_verification_unavailable",
+        "elapsed_total_s": 47.6,
+        "trace_schema": 1,
+        "seq": 13,
+        "ts": 1791254448.813
+      }
+    },
+    {
+      "level": "L1",
+      "coefficient": 0.2,
+      "status": "FUNCTION_ERROR",
+      "stage_exit_codes": {
+        "xvlog": 0,
+        "xelab": 0,
+        "xsim": 0
+      },
+      "mismatches": 305,
+      "samples": 305,
+      "failed_stage": "xsim",
+      "task": "h02_saturating_add",
+      "mode": "baseline",
+      "generation_rc": 0,
+      "generation_elapsed_s": 2.0,
+      "total_elapsed_s": 6.032,
+      "model_calls": 1,
+      "successful_model_calls": 1,
+      "solution_sha256": "b78b6087f7feb1ac483e18d23632608f9d67d2b5ffea1168bc7a621de9e38d30",
+      "internal_finish": null
+    },
+    {
+      "level": "L0",
+      "coefficient": 0.0,
+      "status": "CODE_ERROR",
+      "stage_exit_codes": {
+        "xvlog": 1
+      },
+      "failed_stage": "xvlog",
+      "task": "h02_saturating_add",
+      "mode": "agent",
+      "generation_rc": 0,
+      "generation_elapsed_s": 18.781,
+      "total_elapsed_s": 19.25,
+      "model_calls": 4,
+      "successful_model_calls": 4,
+      "solution_sha256": "6b5b7aa94b521928e149216fa46c46b443347898eb62c1db93a724a90e4024c2",
+      "internal_finish": {
+        "tool": "orchestrator",
+        "event": "finished",
+        "delivered_level": 0,
+        "verification_scope": "internal_milestone_not_official_score",
+        "bytes": 413,
+        "solution_sha256": "88befbc2874842eed056a6fb2caf2398dffcfb0e66a6f8a4184ff8cce6447cdd",
+        "reason": "budget_exhausted",
+        "elapsed_total_s": 18.68,
+        "trace_schema": 1,
+        "seq": 17,
+        "ts": 1791254502.022
+      }
+    },
+    {
+      "level": "L1",
+      "coefficient": 0.2,
+      "status": "FUNCTION_ERROR",
+      "stage_exit_codes": {
+        "xvlog": 0,
+        "xelab": 0,
+        "xsim": 0
+      },
+      "mismatches": 64,
+      "samples": 322,
+      "failed_stage": "xsim",
+      "task": "h03_priority_counter",
+      "mode": "baseline",
+      "generation_rc": 0,
+      "generation_elapsed_s": 4.235,
+      "total_elapsed_s": 8.86,
+      "model_calls": 1,
+      "successful_model_calls": 1,
+      "solution_sha256": "1bde8efaa56aa15e21af3f11c5e168e7511abee756a58a455034e3137d3c1d27",
+      "internal_finish": null
+    },
+    {
+      "level": "L1",
+      "coefficient": 0.2,
+      "status": "FUNCTION_ERROR",
+      "stage_exit_codes": {
+        "xvlog": 0,
+        "xelab": 0,
+        "xsim": 0
+      },
+      "mismatches": 193,
+      "samples": 322,
+      "failed_stage": "xsim",
+      "task": "h03_priority_counter",
+      "mode": "agent",
+      "generation_rc": 0,
+      "generation_elapsed_s": 67.765,
+      "total_elapsed_s": 72.453,
+      "model_calls": 3,
+      "successful_model_calls": 3,
+      "solution_sha256": "428f15aaef764d4c5776c8738c5729f0bec807c06c03bb5bf2f17d2d73cc6ac8",
+      "internal_finish": {
+        "tool": "orchestrator",
+        "event": "finished",
+        "delivered_level": 1,
+        "verification_scope": "internal_milestone_not_official_score",
+        "bytes": 946,
+        "solution_sha256": "df633c09baf04d5d2ccbb667ff290c3fb3ca6d24365fd9371b276e889e9b7e99",
+        "reason": "local_verification_unavailable",
+        "elapsed_total_s": 67.67,
+        "trace_schema": 1,
+        "seq": 13,
+        "ts": 1791254579.142
+      }
+    },
+    {
+      "level": "L1",
+      "coefficient": 0.2,
+      "status": "FUNCTION_ERROR",
+      "stage_exit_codes": {
+        "xvlog": 0,
+        "xelab": 0,
+        "xsim": 0
+      },
+      "mismatches": 2,
+      "samples": 282,
+      "failed_stage": "xsim",
+      "task": "h04_enabled_pipeline",
+      "mode": "baseline",
+      "generation_rc": 0,
+      "generation_elapsed_s": 3.015,
+      "total_elapsed_s": 7.422,
+      "model_calls": 1,
+      "successful_model_calls": 1,
+      "solution_sha256": "7838c5696e897593966456895c9126a77dcc3e145e1d16eb9d8935838792b00b",
+      "internal_finish": null
+    },
+    {
+      "level": "L1",
+      "coefficient": 0.2,
+      "status": "FUNCTION_ERROR",
+      "stage_exit_codes": {
+        "xvlog": 0,
+        "xelab": 0,
+        "xsim": 0
+      },
+      "mismatches": 120,
+      "samples": 282,
+      "failed_stage": "xsim",
+      "task": "h04_enabled_pipeline",
+      "mode": "agent",
+      "generation_rc": 0,
+      "generation_elapsed_s": 52.421,
+      "total_elapsed_s": 56.828,
+      "model_calls": 3,
+      "successful_model_calls": 2,
+      "solution_sha256": "bc1a5c9700747dee3fa40e68155fb49b7f8e0b2ef66043cb1b79f51feb995e84",
+      "internal_finish": {
+        "tool": "orchestrator",
+        "event": "finished",
+        "delivered_level": 1,
+        "verification_scope": "internal_milestone_not_official_score",
+        "bytes": 463,
+        "solution_sha256": "1c90272ebff01e8baef86f72d0cb6683c82a46a0962028b74ffb60720fab50d3",
+        "reason": "local_verification_unavailable",
+        "elapsed_total_s": 52.32,
+        "trace_schema": 1,
+        "seq": 13,
+        "ts": 1791254643.663
+      }
+    },
+    {
+      "level": "L1",
+      "coefficient": 0.2,
+      "status": "FUNCTION_ERROR",
+      "stage_exit_codes": {
+        "xvlog": 0,
+        "xelab": 0,
+        "xsim": 0
+      },
+      "mismatches": 20,
+      "samples": 320,
+      "failed_stage": "xsim",
+      "task": "h05_pattern_0110",
+      "mode": "baseline",
+      "generation_rc": 0,
+      "generation_elapsed_s": 11.89,
+      "total_elapsed_s": 16.218,
+      "model_calls": 1,
+      "successful_model_calls": 1,
+      "solution_sha256": "e48a6adcefd27440e3ed61b75a5faf0fec5f2d910b51a5efb47547ed89ddd9df",
+      "internal_finish": null
+    },
+    {
+      "level": "L1",
+      "coefficient": 0.2,
+      "status": "FUNCTION_ERROR",
+      "stage_exit_codes": {
+        "xvlog": 0,
+        "xelab": 0,
+        "xsim": 0
+      },
+      "mismatches": 106,
+      "samples": 320,
+      "failed_stage": "xsim",
+      "task": "h05_pattern_0110",
+      "mode": "agent",
+      "generation_rc": 0,
+      "generation_elapsed_s": 101.5,
+      "total_elapsed_s": 105.797,
+      "model_calls": 5,
+      "successful_model_calls": 4,
+      "solution_sha256": "4615587dde80d2c4be44a2f88c9422c1f49d523159e6c1a065e314364a2795e2",
+      "internal_finish": {
+        "tool": "orchestrator",
+        "event": "finished",
+        "delivered_level": 1,
+        "verification_scope": "internal_milestone_not_official_score",
+        "bytes": 439,
+        "solution_sha256": "062f109ed87612ddb717418d5fbbd85bf86346ccfe52ddd4e3176703dbbfa306",
+        "reason": "local_verification_unavailable",
+        "elapsed_total_s": 101.4,
+        "trace_schema": 1,
+        "seq": 20,
+        "ts": 1791254765.784
+      }
+    },
+    {
+      "level": "L1",
+      "coefficient": 0.2,
+      "status": "FUNCTION_ERROR",
+      "stage_exit_codes": {
+        "xvlog": 0,
+        "xelab": 0,
+        "xsim": 0
+      },
+      "mismatches": 5,
+      "samples": 335,
+      "failed_stage": "xsim",
+      "task": "h06_pattern_1001001",
+      "mode": "baseline",
+      "generation_rc": 0,
+      "generation_elapsed_s": 6.063,
+      "total_elapsed_s": 10.485,
+      "model_calls": 1,
+      "successful_model_calls": 1,
+      "solution_sha256": "fd567a49a7c28fcc8849c3d81630a20a242af78e742b0a60565db8618a22a80d",
+      "internal_finish": null
+    },
+    {
+      "level": "L1",
+      "coefficient": 0.2,
+      "status": "FUNCTION_ERROR",
+      "stage_exit_codes": {
+        "xvlog": 0,
+        "xelab": 0,
+        "xsim": 0
+      },
+      "mismatches": 10,
+      "samples": 335,
+      "failed_stage": "xsim",
+      "task": "h06_pattern_1001001",
+      "mode": "agent",
+      "generation_rc": 0,
+      "generation_elapsed_s": 66.718,
+      "total_elapsed_s": 71.047,
+      "model_calls": 3,
+      "successful_model_calls": 2,
+      "solution_sha256": "a86bf6b8348bbb127f8719c1017a440a7a18624b9262dc9e91b386922332ff69",
+      "internal_finish": {
+        "tool": "orchestrator",
+        "event": "finished",
+        "delivered_level": 1,
+        "verification_scope": "internal_milestone_not_official_score",
+        "bytes": 451,
+        "solution_sha256": "821b1029fcc8234369d5df8bd23029fee0446df8ccffe2914730696f2024484c",
+        "reason": "local_verification_unavailable",
+        "elapsed_total_s": 66.61,
+        "trace_schema": 1,
+        "seq": 13,
+        "ts": 1791254847.28
+      }
+    }
+  ],
+  "model": "qwen2.5-coder:7b-instruct-q4_K_M",
+  "base_url": "http://127.0.0.1:11435/v1",
+  "config": {
+    "AGENT_DEADLINE_S": "150",
+    "AGENT_MAX_ROUNDS": "2",
+    "LLM_TIMEOUT_S": "45",
+    "VIVADO_BIN": "D:\\AMDDesignTools\\2026.1\\Vivado\\bin"
+  },
+  "server_models": [
+    {
+      "id": "qwen2.5-coder:7b-instruct-q4_K_M",
+      "object": "model",
+      "created": 1791190609,
+      "owned_by": "library"
+    }
+  ],
+  "ollama_tags": {
+    "models": [
+      {
+        "name": "qwen2.5-coder:7b-instruct-q4_K_M",
+        "model": "qwen2.5-coder:7b-instruct-q4_K_M",
+        "modified_at": "2026-10-05T16:56:49.2494763+08:00",
+        "size": 4683087561,
+        "digest": "dae161e27b0e90dd1856c8bb3209201fd6736d8eb66298e75ed87571486f4364",
+        "details": {
+          "parent_model": "",
+          "format": "gguf",
+          "family": "qwen2",
+          "families": [
+            "qwen2"
+          ],
+          "parameter_size": "7.6B",
+          "quantization_level": "Q4_K_M",
+          "context_length": 32768,
+          "embedding_length": 3584
+        },
+        "capabilities": [
+          "completion",
+          "tools",
+          "insert"
+        ]
+      }
+    ]
+  },
+  "ollama_before": {
+    "models": [
+      {
+        "name": "qwen2.5-coder:7b-instruct-q4_K_M",
+        "model": "qwen2.5-coder:7b-instruct-q4_K_M",
+        "size": 5465282968,
+        "digest": "dae161e27b0e90dd1856c8bb3209201fd6736d8eb66298e75ed87571486f4364",
+        "details": {
+          "parent_model": "",
+          "format": "gguf",
+          "family": "qwen2",
+          "families": [
+            "qwen2"
+          ],
+          "parameter_size": "7.6B",
+          "quantization_level": "Q4_K_M"
+        },
+        "expires_at": "2026-10-06T10:42:36.1369012+08:00",
+        "size_vram": 5465282968,
+        "context_length": 16384
+      }
+    ]
+  },
+  "task_sha256": {
+    "h01_alu": {
+      "interface.txt": "d32326ca3e7ef50e49143315aa4787ab89320bd685f93fd889687970360f0889",
+      "positive_fixture.sv": "40793c855037cb00f8c35c5298eff1600021d417ff4ce2c2fcd628afa9cc2e36",
+      "prompt.txt": "9e2da262c601a9bae502f402610a2905f3756211844f31b2be1838c558ebf5c6",
+      "ref.sv": "01a77824637b630b5c0b22460fdb861d76883924185e525adbb837e179b1302f",
+      "task.json": "2eb282c66768bc36a2b14fe9e98f191560abcd35463996f13e06c620e9055570",
+      "tb.sv": "87687e1df4616b903fd9417ea66b96c5484eab28d3abdb8ac88e875f8f0f7e96"
+    },
+    "h02_saturating_add": {
+      "interface.txt": "831b05271d281d15bf0df624beb15d0ae551f2e95eda0a8187101da19c9a2e56",
+      "positive_fixture.sv": "64d489c7c24e7d1d3a4b1d100e2ae40e017942a704cb0321a550d524f0f1bfb8",
+      "prompt.txt": "6b8752ad68550859a474dcfe07b777f85473028412ba849b64406b6dc56dfb8c",
+      "ref.sv": "01a77824637b630b5c0b22460fdb861d76883924185e525adbb837e179b1302f",
+      "task.json": "702681cd109e697fc7a47ece8e40840ad3dface546eb4058d9dde2408ef6c5d0",
+      "tb.sv": "de8cb85262e9b6ba92cc9b5892c6fa465635cea01992ea2f7ecfe808bf00e847"
+    },
+    "h03_priority_counter": {
+      "interface.txt": "a297f0e74f5d56ace0e4266e306033b4fc33874b75e04d465ffe741cb65c4127",
+      "positive_fixture.sv": "5b5ae826f386b4e129c36325affad39e623a0c099df8cc9978755e9ebfd4418f",
+      "prompt.txt": "35048ba283fc99c8324768d97a8236b4dc7900b2b0bdc32fc1dc0a7c0956623a",
+      "ref.sv": "01a77824637b630b5c0b22460fdb861d76883924185e525adbb837e179b1302f",
+      "task.json": "592b057fbc1a8d408ae076510cdb4307d85f667f150ec24c4ee119819ab0296d",
+      "tb.sv": "0ab5d119019e2d1f780c1099cd4783de8f02836d2fc4fa65884811a7e74e063f"
+    },
+    "h04_enabled_pipeline": {
+      "interface.txt": "8f99378b7256eb7218f101677497247b46f7abdfa1013bbe692964ceea5d0ef6",
+      "positive_fixture.sv": "e3bf6241fa91f30fcd94fb0ee085da1a7606744de553673e2faefba30dc60bc6",
+      "prompt.txt": "7df7113696602be1f999cd525b0e594aa1a203362c075484e6c280537b025555",
+      "ref.sv": "01a77824637b630b5c0b22460fdb861d76883924185e525adbb837e179b1302f",
+      "task.json": "a03845bf3c4e73361b79caa361d44e47229c1361cc1f64c75c6dc0f30d7bb131",
+      "tb.sv": "05c29c962575fb0753781bb33a1d8954b51b183fa65672bd5deefe17de6b0333"
+    },
+    "h05_pattern_0110": {
+      "interface.txt": "48bf20b6113a6988849a8e6eaeee562c6bc285564c5a78dee5770d167abe1cd4",
+      "positive_fixture.sv": "d154d103fdc3963b2789dde10058ab24d4582a19732b00e5d13d1d293385bdf0",
+      "prompt.txt": "3d68a0dc8aef747ac7169fb419014e83d339c846e264078b4d30c6358062edef",
+      "ref.sv": "01a77824637b630b5c0b22460fdb861d76883924185e525adbb837e179b1302f",
+      "task.json": "c14a34f5d7fa72e2bec829f22b0a5fab94859de33d744cd547d5259a4ca27512",
+      "tb.sv": "3aa1dae7784b9cee2b9b1e101a0dcec4b13708609605f2708fc0c3f6ce48b191"
+    },
+    "h06_pattern_1001001": {
+      "interface.txt": "48bf20b6113a6988849a8e6eaeee562c6bc285564c5a78dee5770d167abe1cd4",
+      "positive_fixture.sv": "2e404e273e1c60e1174a10a2d0b549a03caa9ca3387571f33e641799f2c379bc",
+      "prompt.txt": "c4f263906b41db4aca0d4e9de997ec531705e9f9110ccd5efac2dfadaddb0ce7",
+      "ref.sv": "01a77824637b630b5c0b22460fdb861d76883924185e525adbb837e179b1302f",
+      "task.json": "479540fc0cac3bbed5979f42dbee5add3a7665ab5967221aaf736432ef065432",
+      "tb.sv": "d496aede22063c42efcffd4d20f08af25557ac30059387914aefc853a91205d7"
+    }
+  },
+  "elapsed_total_s": 454.062,
+  "source_changed_during_run": false,
+  "ollama_after": {
+    "models": [
+      {
+        "name": "qwen2.5-coder:7b-instruct-q4_K_M",
+        "model": "qwen2.5-coder:7b-instruct-q4_K_M",
+        "size": 5465282968,
+        "digest": "dae161e27b0e90dd1856c8bb3209201fd6736d8eb66298e75ed87571486f4364",
+        "details": {
+          "parent_model": "",
+          "format": "gguf",
+          "family": "qwen2",
+          "families": [
+            "qwen2"
+          ],
+          "parameter_size": "7.6B",
+          "quantization_level": "Q4_K_M"
+        },
+        "expires_at": "2026-10-06T10:52:27.2794276+08:00",
+        "size_vram": 5465282968,
+        "context_length": 16384
+      }
+    ]
+  }
+}

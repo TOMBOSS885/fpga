@@ -1,0 +1,10 @@
+{
+  "task_id": "h05_pattern_0110",
+  "top": "TopModule",
+  "part": "xczu3eg-sbva484-1-e",
+  "period_ns": 5,
+  "reference_module": "ref.sv",
+  "testbench": "tb.sv",
+  "tb_top": "AgentSelfTest",
+  "extra_files": []
+}

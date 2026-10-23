@@ -1,0 +1,2 @@
+module TopModule(input clk, input reset, input load, input [3:0] value, input up, input down, output reg [3:0] y);
+endmodule

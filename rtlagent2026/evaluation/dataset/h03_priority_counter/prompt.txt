@@ -1,0 +1,2 @@
+Implement a module named TopModule.
+A 4-bit unsigned saturating counter updated on each rising clk edge. Active-high synchronous reset sets y=0 and has highest priority. Otherwise load sets y=value. Otherwise up=1/down=0 increments unless y=15; up=0/down=1 decrements unless y=0. Both equal means hold. Output y is registered.

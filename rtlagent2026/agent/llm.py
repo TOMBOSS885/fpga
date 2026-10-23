@@ -99,6 +99,7 @@ class LLM:
         self._emit_trace(
             event="response", elapsed_s=res.elapsed_s,
             tokens_in=res.tokens_in, tokens_out=res.tokens_out,
+            response=res.text, temperature=temp, max_tokens=tokens,
         )
         return res
 

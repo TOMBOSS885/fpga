@@ -16,6 +16,7 @@ import shutil
 import subprocess
 import tempfile
 import textwrap
+import time
 
 PART = os.environ.get("RTL_PART", "xczu3eg-sbva484-1-e")
 
@@ -31,6 +32,12 @@ def _scratch_dir() -> str | None:
 
 
 def _run(cmd: list[str], cwd: str, timeout_s: float) -> tuple[int, str]:
+    process_env = os.environ.copy()
+    if os.name == "nt":
+        process_env.setdefault("XILINX_LOCAL_USER_DATA", "NO")
+        if cmd[0].lower().endswith((".bat", ".cmd")):
+            command = subprocess.list2cmdline(cmd)
+            cmd = subprocess.list2cmdline([os.environ.get("COMSPEC", "cmd.exe")]) + ' /d /s /c "' + command + '"'
     try:
         proc = subprocess.run(
             cmd,
@@ -41,6 +48,7 @@ def _run(cmd: list[str], cwd: str, timeout_s: float) -> tuple[int, str]:
             check=False,
             text=True,
             errors="replace",
+            env=process_env,
         )
         return proc.returncode, proc.stdout
     except subprocess.TimeoutExpired:
@@ -100,13 +108,17 @@ class RtlToolchain:
             for cand in viv_cands:
                 if cand and os.path.isdir(os.path.join(cand, "bin")):
                     bin_dir = os.path.join(cand, "bin")
-                    os.environ["PATH"] = f"{bin_dir}:{os.environ.get('PATH', '')}"
+                    os.environ["PATH"] = bin_dir + os.pathsep + os.environ.get("PATH", "")
                     break
 
-        self.xvlog = shutil.which("xvlog")
-        self.xelab = shutil.which("xelab")
-        self.xsim = shutil.which("xsim")
-        self.vivado = shutil.which("vivado")
+        bindir = os.environ.get("VIVADO_BIN", "")
+        def locate(name):
+            candidate = os.path.join(bindir, name + (".bat" if os.name == "nt" else ""))
+            return candidate if bindir and os.path.isfile(candidate) else shutil.which(name)
+        self.xvlog = locate("xvlog")
+        self.xelab = locate("xelab")
+        self.xsim = locate("xsim")
+        self.vivado = locate("vivado")
         self.reason = ""
 
         missing = [n for n, p in (("xvlog", self.xvlog), ("xelab", self.xelab),
@@ -121,7 +133,11 @@ class RtlToolchain:
     @staticmethod
     def _license_error(log: str) -> bool:
         return bool(re.search(
-            r"(?:license|licen[cs]e|flexlm|checkout\s+failed|no\s+valid\s+license)",
+            r"(?:license\s+checkout\s+failed|checkout\s+failed|no\s+valid\s+license|"
+            r"valid\s+license\s+(?:was\s+)?not\s+found|"
+            r"(?:failed|unable)\s+to\s+(?:obtain|checkout|check\s+out)[^\n]*license|"
+            r"could\s+not\s+obtain[^\n]*license|license[^\n]*(?:expired|not\s+available)|"
+            r"not\s+licensed|FLEX(?:lm|net)\s+Licensing\s+error)",
             log or "", re.IGNORECASE,
         ))
 
@@ -165,19 +181,27 @@ class RtlToolchain:
             return -1, f"vivado unavailable: {self.reason}"
 
         work = tempfile.mkdtemp(prefix="agent_lint_", dir=_scratch_dir())
+        deadline = time.monotonic() + timeout_s
         try:
             src = os.path.join(work, "solution.sv")
             with open(src, "w", encoding="utf-8") as fh:
                 fh.write(source)
 
             rc, out = _run([self.xvlog or "xvlog", "--sv", "solution.sv"], work, timeout_s)
+            if self._license_error(out):
+                return -2, "LICENSE_ERROR: compilation license unavailable\n" + summarize_log(out)
             if rc != 0:
                 return 1, summarize_log(out)
 
+            remaining = deadline - time.monotonic()
+            if remaining <= 0:
+                return 1, "LINT_TIMEOUT: compilation consumed the stage budget"
             rc, out2 = _run(
                 [self.xelab or "xelab", top, "-s", "dut_snapshot", "-timescale", "1ps/1ps"],
-                work, timeout_s,
+                work, remaining,
             )
+            if self._license_error(out2):
+                return -2, "LICENSE_ERROR: elaboration license unavailable\n" + summarize_log(out2)
             return (0 if rc == 0 else 1), summarize_log(out + "\n" + out2)
         finally:
             if os.environ.get("AGENT_KEEP_WORK") != "1":
@@ -199,6 +223,8 @@ class RtlToolchain:
 
             # 1. Compile both
             rc, out1 = _run([self.xvlog or "xvlog", "--sv", "dut.sv", "tb.sv"], work, timeout_s / 3)
+            if self._license_error(out1):
+                return -2, "LICENSE_ERROR: compilation license unavailable\n" + summarize_log(out1)
             if rc != 0:
                 return 1, "TB compilation failed:\n" + summarize_log(out1)
 
@@ -207,6 +233,8 @@ class RtlToolchain:
                 [self.xelab or "xelab", tb_top, "-s", "sim_snap", "-timescale", "1ps/1ps"],
                 work, timeout_s / 3,
             )
+            if self._license_error(out2):
+                return -2, "LICENSE_ERROR: elaboration license unavailable\n" + summarize_log(out2)
             if rc != 0:
                 return 1, "TB elaboration failed:\n" + summarize_log(out1 + "\n" + out2)
 
@@ -218,18 +246,23 @@ class RtlToolchain:
                 return -2, "LICENSE_ERROR: simulator license unavailable\n" + summarize_log(full_log)
 
             # Check simulator output, rather than xelab's informational log.
-            if "TB_SUCCESS" in out3:
-                return 0, "Self-checking testbench passed successfully."
-            if "TB_FAILURE" in out3 or "ASSERTION FAILED" in out3 or "Mismatches" in out3:
+            if rc != 0:
+                return 1, "SIM_PROCESS_FAILURE: nonzero simulator exit\n" + summarize_log(full_log)
+            if re.search(r"TB_FAILURE|ASSERTION\s+FAILED|(?:^|\s)(?:ERROR|FATAL):", out3, re.IGNORECASE):
                 return 1, "Self-checking testbench reported mismatch:\n" + summarize_log(out3)
-
-            if rc == 0:
+            verdicts = re.findall(r"^\s*TB_RESULT\s+checks=(\d+)\s+errors=(\d+)\s*$", out3, re.MULTILINE)
+            if len(verdicts) != 1:
                 # Vivado/xsim can exit successfully after failing to obtain a
                 # simulator license, while emitting neither a mismatch nor a
                 # verdict line.  Treat the missing verdict as an environment
                 # failure so the repair loop does not corrupt a valid DUT.
-                return -2, "ENVIRONMENT_ERROR: xsim exited 0 without a TB verdict marker:\n" + summarize_log(full_log)
-            return 1, summarize_log(full_log)
+                return -3, "VERIFICATION_UNAVAILABLE: missing or ambiguous structured TB_RESULT\n" + summarize_log(full_log)
+            checks, errors = map(int, verdicts[0])
+            if checks <= 0:
+                return -3, "VERIFICATION_UNAVAILABLE: testbench performed zero reported comparisons"
+            if errors:
+                return 1, f"Self-checking testbench reported {errors} mismatches in {checks} comparisons."
+            return 0, f"Self-checking testbench passed {checks} reported comparisons."
         finally:
             if os.environ.get("AGENT_KEEP_WORK") != "1":
                 shutil.rmtree(work, ignore_errors=True)
